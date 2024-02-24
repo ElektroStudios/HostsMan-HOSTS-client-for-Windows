@@ -10,17 +10,17 @@ Imports System.Runtime.InteropServices
 
 ' Review the values of the assembly attributes
 
-<Assembly: AssemblyTitle("HostsMan")> 
-<Assembly: AssemblyDescription("Hosts File Manager")> 
+<Assembly: AssemblyTitle("HostsMan")>
+<Assembly: AssemblyDescription("HOSTS File Manager Client")>
 <Assembly: AssemblyCompany("ElektroStudios")> 
 <Assembly: AssemblyProduct("HostsMan")>
-<Assembly: AssemblyCopyright("Copyright © ElektroStudios 2015")>
+<Assembly: AssemblyCopyright("Copyright © ElektroStudios 2015-2024")>
 <Assembly: AssemblyTrademark("")> 
 
 <Assembly: ComVisible(False)> 
 
 'The following GUID is for the ID of the typelib if this project is exposed to COM
-<Assembly: Guid("c71e3dbf-914c-43b1-896f-b20918a12d45")> 
+<Assembly: Guid("c71e3dbf-914c-43b1-896f-b20918a12d45")>
 
 ' Version information for an assembly consists of the following four values:
 '
@@ -33,7 +33,7 @@ Imports System.Runtime.InteropServices
 ' by using the '*' as shown below:
 ' <Assembly: AssemblyVersion("1.0.*")> 
 
-<Assembly: AssemblyVersion("1.0.0.0")> 
-<Assembly: AssemblyFileVersion("1.0.0.0")> 
+<Assembly: AssemblyVersion("1.1.0.0")>
+<Assembly: AssemblyFileVersion("1.1.0.0")>
 
 <Assembly: NeutralResourcesLanguageAttribute("en")> 
