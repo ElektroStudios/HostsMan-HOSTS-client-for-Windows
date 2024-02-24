@@ -48,7 +48,7 @@ winforms
 
 ## 🤖 Getting Started
 
-Download the latest release by clicking [here](https://github.com/ElektroStudios/PROJECT_NAME/releases/latest),
+Download the latest release by clicking [here](https://github.com/ElektroStudios/HostsMan-HOSTS-client-for-Windows/releases/latest),
 
 ## 🔄 Change Log
 
@@ -60,7 +60,7 @@ This Work (the repository and the content provided in) is provided "as is", with
 
 ## 💪 Contributing
 
-Your contribution is highly appreciated!. If you have any ideas, suggestions, or encounter issues, feel free to open an issue by clicking [here](https://github.com/ElektroStudios/PROJECT_NAME/issues/new/choose). 
+Your contribution is highly appreciated!. If you have any ideas, suggestions, or encounter issues, feel free to open an issue by clicking [here](https://github.com/ElektroStudios/HostsMan-HOSTS-client-for-Windows/issues/new/choose). 
 
 Your input helps make this Work better for everyone. Thank you for your support! 🚀
 
