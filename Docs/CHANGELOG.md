@@ -1,4 +1,4 @@
-# HostsMan Change Log 📋
+﻿# HostsMan Change Log 📋
 
 ## v1.1 (2024) *(current)* 🆕
 #### 🌟 Improvements:
