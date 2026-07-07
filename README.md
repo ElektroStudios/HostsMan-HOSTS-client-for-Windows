@@ -44,7 +44,7 @@ winforms
     <a href="LICENSE"><img src="https://img.shields.io/github/license/ElektroStudios/HostsMan" alt="License"></a>
   <br>
     <a href="https://api.github.com/repos/ElektroStudios/HostsMan-HOSTS-client-for-Windows/zipball"><img src="https://img.shields.io/github/repo-size/ElektroStudios/HostsMan" alt="Repo size"></a>
-    <a href="https://somsubhra.github.io/github-release-stats/?username=ElektroStudios&repository=HostsMan"><img src="https://img.shields.io/github/downloads/ElektroStudios/HostsMan-HOSTS-client-for-Windows/total.svg?label=total%20downloads" alt="Total Downloads"></a>
+    <a href="https://somsubhra.github.io/github-release-stats/?username=ElektroStudios&repository=HostsMan-HOSTS-client-for-Windows"><img src="https://img.shields.io/github/downloads/ElektroStudios/HostsMan-HOSTS-client-for-Windows/total.svg?label=total%20downloads" alt="Total Downloads"></a>
     <a href="https://github.com/ElektroStudios/HostsMan-HOSTS-client-for-Windows/commits"><img src="https://img.shields.io/github/last-commit/ElektroStudios/HostsMan" alt="Last commit"></a>
     <a href="https://github.com/ElektroStudios/HostsMan-HOSTS-client-for-Windows/pulls"><img src="https://img.shields.io/github/issues-pr/ElektroStudios/HostsMan" alt="Pull Requests"></a>
     <a href="https://github.com/ElektroStudios/HostsMan-HOSTS-client-for-Windows/issues?q=is%3Aissue+is%3Aopen"><img src="https://img.shields.io/github/issues/ElektroStudios/HostsMan?color=blue" alt="Open Issues"></a><a href="https://github.com/ElektroStudios/HostsMan-HOSTS-client-for-Windows/issues?q=is%3Aissue+is%3Aclosed"><img src="https://img.shields.io/github/issues-closed/ElektroStudios/HostsMan?label=&color=28a745" alt="Closed Issues"></a>
