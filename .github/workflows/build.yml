@@ -4,7 +4,7 @@
 env:
   SOLUTION_NAME: "HostsMan"
   SOLUTION_EXT:  "sln"
-  SONAR_PROJECT_KEY:  "ElektroStudios_HostsMan"
+  SONAR_PROJECT_KEY:  "ElektroStudios_HostsMan-HOSTS-client-for-Windows"
   SONAR_ORGANIZATION: "elektrostudios"
 # ------------------------------------------
 
