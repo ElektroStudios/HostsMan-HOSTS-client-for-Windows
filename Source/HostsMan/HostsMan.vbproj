@@ -11,6 +11,7 @@
     <AssemblyName>HostsMan</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <MyType>WindowsForms</MyType>
+    <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <TargetFrameworkProfile />
     <NuGetPackageImportStamp>
