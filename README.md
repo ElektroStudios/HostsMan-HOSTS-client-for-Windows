@@ -28,31 +28,32 @@ winforms
 ------------------
 
 <p align="center">
-    <a href="https://github.com/ElektroStudios/HostsMan-HOSTS-client-for-Windows/network/members"><img src="https://img.shields.io/github/forks/ElektroStudios/HostsMan.svg?style=social&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjwvc3ZnPg%3D%3D&label=%F0%9F%8D%B4%20Forks" alt="Forks"></a>&nbsp;
-    <a href="https://github.com/ElektroStudios/HostsMan-HOSTS-client-for-Windows/graphs/contributors"><img src="https://img.shields.io/github/contributors/ElektroStudios/HostsMan.svg?style=social&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjwvc3ZnPg%3D%3D&label=%F0%9F%91%A5%20Contributors" alt="Contributors"></a>&nbsp;
+    <a href="https://github.com/ElektroStudios/HostsMan-HOSTS-client-for-Windows/network/members"><img src="https://img.shields.io/github/forks/ElektroStudios/HostsMan-HOSTS-client-for-Windows.svg?style=social&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjwvc3ZnPg%3D%3D&label=%F0%9F%8D%B4%20Forks" alt="Forks"></a>&nbsp;
+    <a href="https://github.com/ElektroStudios/HostsMan-HOSTS-client-for-Windows/graphs/contributors"><img src="https://img.shields.io/github/contributors/ElektroStudios/HostsMan-HOSTS-client-for-Windows.svg?style=social&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjwvc3ZnPg%3D%3D&label=%F0%9F%91%A5%20Contributors" alt="Contributors"></a>&nbsp;
     <a href="https://github.com/ElektroStudios"><img src="https://img.shields.io/github/followers/ElektroStudios.svg?style=social&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjwvc3ZnPg%3D%3D&label=%F0%9F%91%A4%20Followers" alt="Followers"></a>&nbsp;
-    <a href="https://github.com/ElektroStudios/HostsMan-HOSTS-client-for-Windows/watchers"><img src="https://img.shields.io/github/watchers/ElektroStudios/HostsMan.svg?style=social&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjwvc3ZnPg%3D%3D&label=%F0%9F%91%80%20Watchers" alt="Watchers"></a>
+    <a href="https://github.com/ElektroStudios/HostsMan-HOSTS-client-for-Windows/watchers"><img src="https://img.shields.io/github/watchers/ElektroStudios/HostsMan-HOSTS-client-for-Windows.svg?style=social&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjwvc3ZnPg%3D%3D&label=%F0%9F%91%80%20Watchers" alt="Watchers"></a>
     <a href="https://github.com/sponsors/ElektroStudios"><img src="https://img.shields.io/github/sponsors/ElektroStudios.svg?style=social&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjwvc3ZnPg%3D%3D&label=%F0%9F%92%96%20Sponsors" alt="Sponsors"></a>&nbsp;
-    <a href="https://github.com/ElektroStudios/HostsMan-HOSTS-client-for-Windows/stargazers"><img src="https://img.shields.io/github/stars/ElektroStudios/HostsMan.svg?style=social&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjwvc3ZnPg%3D%3D&label=%E2%AD%90%20Stars" alt="Stars"></a>
+    <a href="https://github.com/ElektroStudios/HostsMan-HOSTS-client-for-Windows/stargazers"><img src="https://img.shields.io/github/stars/ElektroStudios/HostsMan-HOSTS-client-for-Windows.svg?style=social&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjwvc3ZnPg%3D%3D&label=%E2%AD%90%20Stars" alt="Stars"></a>
   <br>
   <br>
-    <a href="https://ci.appveyor.com/project/ElektroStudios/hostsman-hosts-client-for-windows"><img src="https://ci.appveyor.com/api/projects/status/github/ElektroStudios/hostsman-hosts-client-for-windows?svg=true" alt="AppVeyor CI"></a>
-    <a href="https://sonarcloud.io/summary/new_code?id=ElektroStudios_HostsMan"><img src="https://sonarcloud.io/api/project_badges/measure?project=ElektroStudios_HostsMan&metric=alert_status" alt="SonarCloud Quality Gate"></a>
-    <a href="https://github.com/ElektroStudios/HostsMan-HOSTS-client-for-Windows/releases/latest"><img src="https://img.shields.io/github/v/release/ElektroStudios/HostsMan" alt="Latest Release"></a>
+    <a href="https://ci.appveyor.com/project/ElektroStudios/HostsMan-HOSTS-client-for-Windows"><img src="https://ci.appveyor.com/api/projects/status/github/ElektroStudios/HostsMan-HOSTS-client-for-Windows?svg=true" alt="AppVeyor CI"></a>
+    <a href="https://sonarcloud.io/summary/new_code?id=ElektroStudios_HostsMan-HOSTS-client-for-Windows"><img src="https://sonarcloud.io/api/project_badges/measure?project=ElektroStudios_HostsMan-HOSTS-client-for-Windows&metric=alert_status" alt="SonarCloud Quality Gate"></a>
+    <a href="https://github.com/ElektroStudios/HostsMan-HOSTS-client-for-Windows/releases/latest"><img src="https://img.shields.io/github/v/release/ElektroStudios/HostsMan-HOSTS-client-for-Windows" alt="Latest Release"></a>
     <a href="https://learn.microsoft.com/en-us/dotnet/visual-basic/"><img src="https://img.shields.io/badge/language-VB.NET-purple.svg?logo=visualbasic" alt="Language"></a>
     <a href="https://learn.microsoft.com/en-us/windows/apps/"><img src="https://img.shields.io/badge/platform-Windows-lightgray.svg" alt="Platform"></a>
-    <a href="LICENSE"><img src="https://img.shields.io/github/license/ElektroStudios/HostsMan" alt="License"></a>
+    <a href="LICENSE"><img src="https://img.shields.io/github/license/ElektroStudios/HostsMan-HOSTS-client-for-Windows" alt="License"></a>
   <br>
-    <a href="https://api.github.com/repos/ElektroStudios/HostsMan-HOSTS-client-for-Windows/zipball"><img src="https://img.shields.io/github/repo-size/ElektroStudios/HostsMan" alt="Repo size"></a>
+    <a href="https://api.github.com/repos/ElektroStudios/HostsMan-HOSTS-client-for-Windows/zipball"><img src="https://img.shields.io/github/repo-size/ElektroStudios/HostsMan-HOSTS-client-for-Windows" alt="Repo size"></a>
     <a href="https://somsubhra.github.io/github-release-stats/?username=ElektroStudios&repository=HostsMan-HOSTS-client-for-Windows"><img src="https://img.shields.io/github/downloads/ElektroStudios/HostsMan-HOSTS-client-for-Windows/total.svg?label=total%20downloads" alt="Total Downloads"></a>
-    <a href="https://github.com/ElektroStudios/HostsMan-HOSTS-client-for-Windows/commits"><img src="https://img.shields.io/github/last-commit/ElektroStudios/HostsMan" alt="Last commit"></a>
-    <a href="https://github.com/ElektroStudios/HostsMan-HOSTS-client-for-Windows/pulls"><img src="https://img.shields.io/github/issues-pr/ElektroStudios/HostsMan" alt="Pull Requests"></a>
-    <a href="https://github.com/ElektroStudios/HostsMan-HOSTS-client-for-Windows/issues?q=is%3Aissue+is%3Aopen"><img src="https://img.shields.io/github/issues/ElektroStudios/HostsMan?color=blue" alt="Open Issues"></a><a href="https://github.com/ElektroStudios/HostsMan-HOSTS-client-for-Windows/issues?q=is%3Aissue+is%3Aclosed"><img src="https://img.shields.io/github/issues-closed/ElektroStudios/HostsMan?label=&color=28a745" alt="Closed Issues"></a>
+    <a href="https://github.com/ElektroStudios/HostsMan-HOSTS-client-for-Windows/commits"><img src="https://img.shields.io/github/last-commit/ElektroStudios/HostsMan-HOSTS-client-for-Windows" alt="Last commit"></a>
+    <a href="https://github.com/ElektroStudios/HostsMan-HOSTS-client-for-Windows/pulls"><img src="https://img.shields.io/github/issues-pr/ElektroStudios/HostsMan-HOSTS-client-for-Windows" alt="Pull Requests"></a>
+    <a href="https://github.com/ElektroStudios/HostsMan-HOSTS-client-for-Windows/issues?q=is%3Aissue+is%3Aopen"><img src="https://img.shields.io/github/issues/ElektroStudios/HostsMan-HOSTS-client-for-Windows?color=blue" alt="Open Issues"></a><a href="https://github.com/ElektroStudios/HostsMan-HOSTS-client-for-Windows/issues?q=is%3Aissue+is%3Aclosed"><img src="https://img.shields.io/github/issues-closed/ElektroStudios/HostsMan-HOSTS-client-for-Windows?label=&color=28a745" alt="Closed Issues"></a>
     <a href="https://github.com/ElektroStudios/HostsMan-HOSTS-client-for-Windows/pulse"><img src="https://img.shields.io/badge/maintained-yes-green.svg" alt="Maintenance"></a>
   <br>
   <br>
     <a href="https://en.wikipedia.org/wiki/Spanish_Empire"><img src="https://img.shields.io/badge/Made_in-Spain_%F0%9F%87%AA%F0%9F%87%B8-AA151B?style=flat" alt="Made in Spain"></a>
 </p>
+
 
 ------------------
 
