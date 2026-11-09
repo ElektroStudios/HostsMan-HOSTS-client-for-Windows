@@ -752,9 +752,14 @@ Namespace Tools
                 Throw New FileNotFoundException("Process not found.", process)
             End If
 
-            Using p As Diagnostics.Process = Diagnostics.Process.Start(process, $"""{Me.hostsLocation1}""")
-            End Using
+            Dim psi As New Diagnostics.ProcessStartInfo() With {
+                .FileName = process,
+                .Arguments = $"""{Me.hostsLocation1}""",
+                .UseShellExecute = True
+            }
 
+            Using p As Diagnostics.Process = Diagnostics.Process.Start(psi)
+            End Using
         End Sub
 
 #End Region
