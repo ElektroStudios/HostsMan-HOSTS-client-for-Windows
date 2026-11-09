@@ -2,7 +2,7 @@
 
     <Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
     Partial Class Main
-        Inherits System.Windows.Forms.Form
+        Inherits Global.HostsMan.UserInterface.Controls.ThemedForm
 
         'Form overrides dispose to clean up the component list.
         <System.Diagnostics.DebuggerNonUserCode()> _
@@ -26,7 +26,7 @@
         Private Sub InitializeComponent()
             Me.components = New System.ComponentModel.Container()
             Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Main))
-            Me.ListView_Mappings = New System.Windows.Forms.ListView()
+            Me.ListView_Mappings = New Global.HostsMan.UserInterface.Controls.ThemedListView()
             Me.ColumnHeader_Enabled = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
             Me.ColumnHeader_IP = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
             Me.ColumnHeader_HostName = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
@@ -51,10 +51,12 @@
             Me.ToolStripSeparator3 = New System.Windows.Forms.ToolStripSeparator()
             Me.ToolStripButton_About = New System.Windows.Forms.ToolStripButton()
             Me.Panel_Search = New System.Windows.Forms.Panel()
-            Me.ComboBox_SearchCondition = New System.Windows.Forms.ComboBox()
-            Me.ComboBox_SearchType = New System.Windows.Forms.ComboBox()
+            Me.ComboBox_SearchCondition = New Global.HostsMan.UserInterface.Controls.ThemedComboBox()
+            Me.ComboBox_SearchType = New Global.HostsMan.UserInterface.Controls.ThemedComboBox()
             Me.TextBox_Search = New System.Windows.Forms.TextBox()
             Me.Label_Search = New System.Windows.Forms.Label()
+            Me.ToggleSwitch_DarkTheme = New Global.HostsMan.UserInterface.Controls.ToggleSwitch()
+            Me.ToolTip_Main = New System.Windows.Forms.ToolTip(Me.components)
             Me.ContextMenuStrip_Listview.SuspendLayout()
             Me.ToolStrip_MainMenu.SuspendLayout()
             Me.Panel_Search.SuspendLayout()
@@ -65,6 +67,7 @@
             Me.ListView_Mappings.Columns.AddRange(New System.Windows.Forms.ColumnHeader() {Me.ColumnHeader_Enabled, Me.ColumnHeader_IP, Me.ColumnHeader_HostName, Me.ColumnHeader_Comment})
             Me.ListView_Mappings.ContextMenuStrip = Me.ContextMenuStrip_Listview
             Me.ListView_Mappings.Dock = System.Windows.Forms.DockStyle.Fill
+            Me.ListView_Mappings.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
             Me.ListView_Mappings.FullRowSelect = True
             Me.ListView_Mappings.GridLines = True
             Me.ListView_Mappings.Location = New System.Drawing.Point(0, 104)
@@ -86,12 +89,12 @@
             '
             'ColumnHeader_HostName
             '
-            Me.ColumnHeader_HostName.Text = "HostName"
+            Me.ColumnHeader_HostName.Text = "Hostname"
             Me.ColumnHeader_HostName.Width = 215
             '
             'ColumnHeader_Comment
             '
-            Me.ColumnHeader_Comment.Text = "Mapping Comment"
+            Me.ColumnHeader_Comment.Text = "Comment"
             Me.ColumnHeader_Comment.Width = 215
             '
             'ContextMenuStrip_Listview
@@ -105,21 +108,21 @@
             Me.ToolStripMenuItem_CopyIP.Image = Global.HostsMan.My.Resources.Resources.Clipboard
             Me.ToolStripMenuItem_CopyIP.Name = "ToolStripMenuItem_CopyIP"
             Me.ToolStripMenuItem_CopyIP.Size = New System.Drawing.Size(162, 22)
-            Me.ToolStripMenuItem_CopyIP.Text = "Copy IP"
+            Me.ToolStripMenuItem_CopyIP.Text = "Copy IP address"
             '
             'ToolStripMenuItem_CopyHostname
             '
             Me.ToolStripMenuItem_CopyHostname.Image = Global.HostsMan.My.Resources.Resources.Clipboard
             Me.ToolStripMenuItem_CopyHostname.Name = "ToolStripMenuItem_CopyHostname"
             Me.ToolStripMenuItem_CopyHostname.Size = New System.Drawing.Size(162, 22)
-            Me.ToolStripMenuItem_CopyHostname.Text = "Copy HostName"
+            Me.ToolStripMenuItem_CopyHostname.Text = "Copy hostname"
             '
             'ToolStripMenuItem_Navigate
             '
             Me.ToolStripMenuItem_Navigate.Image = Global.HostsMan.My.Resources.Resources.Navigate
             Me.ToolStripMenuItem_Navigate.Name = "ToolStripMenuItem_Navigate"
             Me.ToolStripMenuItem_Navigate.Size = New System.Drawing.Size(162, 22)
-            Me.ToolStripMenuItem_Navigate.Text = "Navigate"
+            Me.ToolStripMenuItem_Navigate.Text = "Open in web browser"
             '
             'ToolStrip_MainMenu
             '
@@ -143,7 +146,7 @@
             Me.ToolStripButton_Add.Size = New System.Drawing.Size(52, 52)
             Me.ToolStripButton_Add.TextAlign = System.Drawing.ContentAlignment.BottomCenter
             Me.ToolStripButton_Add.TextImageRelation = System.Windows.Forms.TextImageRelation.TextAboveImage
-            Me.ToolStripButton_Add.ToolTipText = "Add New Mapping"
+            Me.ToolStripButton_Add.ToolTipText = "Add a new mapping"
             '
             'ToolStripButton_Remove
             '
@@ -157,7 +160,7 @@
             Me.ToolStripButton_Remove.Size = New System.Drawing.Size(52, 52)
             Me.ToolStripButton_Remove.TextAlign = System.Drawing.ContentAlignment.BottomCenter
             Me.ToolStripButton_Remove.TextImageRelation = System.Windows.Forms.TextImageRelation.TextAboveImage
-            Me.ToolStripButton_Remove.ToolTipText = "Remove Selected Mapping(s)"
+            Me.ToolStripButton_Remove.ToolTipText = "Remove the selected mappings"
             '
             'ToolStripButton_Enable
             '
@@ -171,7 +174,7 @@
             Me.ToolStripButton_Enable.Size = New System.Drawing.Size(52, 52)
             Me.ToolStripButton_Enable.TextAlign = System.Drawing.ContentAlignment.BottomCenter
             Me.ToolStripButton_Enable.TextImageRelation = System.Windows.Forms.TextImageRelation.TextAboveImage
-            Me.ToolStripButton_Enable.ToolTipText = "Enable Selected Mapping(s)"
+            Me.ToolStripButton_Enable.ToolTipText = "Enable the selected mappings"
             '
             'ToolStripButton_Disable
             '
@@ -185,7 +188,7 @@
             Me.ToolStripButton_Disable.Size = New System.Drawing.Size(52, 52)
             Me.ToolStripButton_Disable.TextAlign = System.Drawing.ContentAlignment.BottomCenter
             Me.ToolStripButton_Disable.TextImageRelation = System.Windows.Forms.TextImageRelation.TextAboveImage
-            Me.ToolStripButton_Disable.ToolTipText = "Disable Selected Mapping(s)"
+            Me.ToolStripButton_Disable.ToolTipText = "Disable the selected mappings"
             '
             'ToolStripButton_Edit
             '
@@ -199,7 +202,7 @@
             Me.ToolStripButton_Edit.Size = New System.Drawing.Size(52, 52)
             Me.ToolStripButton_Edit.TextAlign = System.Drawing.ContentAlignment.BottomCenter
             Me.ToolStripButton_Edit.TextImageRelation = System.Windows.Forms.TextImageRelation.TextAboveImage
-            Me.ToolStripButton_Edit.ToolTipText = "Edit Selected Mapping"
+            Me.ToolStripButton_Edit.ToolTipText = "Edit the selected mapping"
             '
             'ToolStripSeparator1
             '
@@ -219,7 +222,7 @@
             Me.ToolStripButton_Rescan.Size = New System.Drawing.Size(52, 52)
             Me.ToolStripButton_Rescan.TextAlign = System.Drawing.ContentAlignment.BottomCenter
             Me.ToolStripButton_Rescan.TextImageRelation = System.Windows.Forms.TextImageRelation.TextAboveImage
-            Me.ToolStripButton_Rescan.ToolTipText = "Rescan Hosts File"
+            Me.ToolStripButton_Rescan.ToolTipText = "Reload the mappings from the hosts file"
             '
             'ToolStripButton_Clean
             '
@@ -233,7 +236,7 @@
             Me.ToolStripButton_Clean.Size = New System.Drawing.Size(52, 52)
             Me.ToolStripButton_Clean.TextAlign = System.Drawing.ContentAlignment.BottomCenter
             Me.ToolStripButton_Clean.TextImageRelation = System.Windows.Forms.TextImageRelation.TextAboveImage
-            Me.ToolStripButton_Clean.ToolTipText = "Clean All Mappings"
+            Me.ToolStripButton_Clean.ToolTipText = "Remove all the mappings from the list"
             '
             'ToolStripButton_Save
             '
@@ -247,7 +250,7 @@
             Me.ToolStripButton_Save.Size = New System.Drawing.Size(52, 52)
             Me.ToolStripButton_Save.TextAlign = System.Drawing.ContentAlignment.BottomCenter
             Me.ToolStripButton_Save.TextImageRelation = System.Windows.Forms.TextImageRelation.TextAboveImage
-            Me.ToolStripButton_Save.ToolTipText = "Save Changes To Hosts File"
+            Me.ToolStripButton_Save.ToolTipText = "Save the changes to the hosts file"
             '
             'ToolStripSeparator2
             '
@@ -267,7 +270,7 @@
             Me.ToolStripButton_Directory.Size = New System.Drawing.Size(52, 52)
             Me.ToolStripButton_Directory.TextAlign = System.Drawing.ContentAlignment.BottomCenter
             Me.ToolStripButton_Directory.TextImageRelation = System.Windows.Forms.TextImageRelation.TextAboveImage
-            Me.ToolStripButton_Directory.ToolTipText = "Open Hosts Directory"
+            Me.ToolStripButton_Directory.ToolTipText = "Show the hosts file in File Explorer"
             '
             'ToolStripButton_Notepad
             '
@@ -280,7 +283,7 @@
             Me.ToolStripButton_Notepad.Size = New System.Drawing.Size(52, 52)
             Me.ToolStripButton_Notepad.TextAlign = System.Drawing.ContentAlignment.BottomCenter
             Me.ToolStripButton_Notepad.TextImageRelation = System.Windows.Forms.TextImageRelation.TextAboveImage
-            Me.ToolStripButton_Notepad.ToolTipText = "Open Hosts With Notepad"
+            Me.ToolStripButton_Notepad.ToolTipText = "Open the hosts file in Notepad"
             '
             'ToolStripSeparator3
             '
@@ -299,11 +302,12 @@
             Me.ToolStripButton_About.Size = New System.Drawing.Size(52, 52)
             Me.ToolStripButton_About.TextAlign = System.Drawing.ContentAlignment.BottomCenter
             Me.ToolStripButton_About.TextImageRelation = System.Windows.Forms.TextImageRelation.TextAboveImage
-            Me.ToolStripButton_About.ToolTipText = "About..."
+            Me.ToolStripButton_About.ToolTipText = "About HostsMan"
             '
             'Panel_Search
             '
             Me.Panel_Search.BackColor = System.Drawing.SystemColors.Control
+            Me.Panel_Search.Controls.Add(Me.ToggleSwitch_DarkTheme)
             Me.Panel_Search.Controls.Add(Me.ComboBox_SearchCondition)
             Me.Panel_Search.Controls.Add(Me.ComboBox_SearchType)
             Me.Panel_Search.Controls.Add(Me.TextBox_Search)
@@ -318,7 +322,7 @@
             '
             Me.ComboBox_SearchCondition.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
             Me.ComboBox_SearchCondition.FormattingEnabled = True
-            Me.ComboBox_SearchCondition.Items.AddRange(New Object() {"Starting with text...", "Containing text..."})
+            Me.ComboBox_SearchCondition.Items.AddRange(New Object() {"Starts with", "Contains"})
             Me.ComboBox_SearchCondition.Location = New System.Drawing.Point(145, 4)
             Me.ComboBox_SearchCondition.Name = "ComboBox_SearchCondition"
             Me.ComboBox_SearchCondition.Size = New System.Drawing.Size(114, 21)
@@ -328,7 +332,7 @@
             '
             Me.ComboBox_SearchType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
             Me.ComboBox_SearchType.FormattingEnabled = True
-            Me.ComboBox_SearchType.Items.AddRange(New Object() {"IP", "HostName"})
+            Me.ComboBox_SearchType.Items.AddRange(New Object() {"IP address", "Hostname", "Comment"})
             Me.ComboBox_SearchType.Location = New System.Drawing.Point(54, 4)
             Me.ComboBox_SearchType.Name = "ComboBox_SearchType"
             Me.ComboBox_SearchType.Size = New System.Drawing.Size(85, 21)
@@ -340,8 +344,8 @@
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
             Me.TextBox_Search.Location = New System.Drawing.Point(265, 5)
             Me.TextBox_Search.Name = "TextBox_Search"
-            Me.TextBox_Search.Size = New System.Drawing.Size(354, 20)
-            Me.TextBox_Search.TabIndex = 4
+            Me.TextBox_Search.Size = New System.Drawing.Size(247, 20)
+            Me.TextBox_Search.TabIndex = 6
             '
             'Label_Search
             '
@@ -351,6 +355,19 @@
             Me.Label_Search.Size = New System.Drawing.Size(41, 13)
             Me.Label_Search.TabIndex = 0
             Me.Label_Search.Text = "Search"
+            '
+            'ToggleSwitch_DarkTheme
+            '
+            Me.ToggleSwitch_DarkTheme.AccessibleName = "Dark theme"
+            Me.ToggleSwitch_DarkTheme.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+            Me.ToggleSwitch_DarkTheme.Location = New System.Drawing.Point(518, 4)
+            Me.ToggleSwitch_DarkTheme.Name = "ToggleSwitch_DarkTheme"
+            Me.ToggleSwitch_DarkTheme.Size = New System.Drawing.Size(100, 22)
+            Me.ToggleSwitch_DarkTheme.TabIndex = 7
+            Me.ToggleSwitch_DarkTheme.CheckedText = "Dark theme"
+            Me.ToggleSwitch_DarkTheme.Text = "Dark theme"
+            Me.ToggleSwitch_DarkTheme.UncheckedText = "Light theme"
+            Me.ToolTip_Main.SetToolTip(Me.ToggleSwitch_DarkTheme, "Switch between the light and the dark theme")
             '
             'Main
             '
@@ -374,7 +391,7 @@
             Me.PerformLayout()
 
         End Sub
-        Friend WithEvents ListView_Mappings As System.Windows.Forms.ListView
+        Friend WithEvents ListView_Mappings As Global.HostsMan.UserInterface.Controls.ThemedListView
         Friend WithEvents ToolStrip_MainMenu As System.Windows.Forms.ToolStrip
         Friend WithEvents ToolStripButton_Add As System.Windows.Forms.ToolStripButton
         Friend WithEvents ToolStripButton_Directory As System.Windows.Forms.ToolStripButton
@@ -397,12 +414,14 @@
         Friend WithEvents ColumnHeader_Enabled As System.Windows.Forms.ColumnHeader
         Friend WithEvents ToolStripButton_Edit As System.Windows.Forms.ToolStripButton
         Friend WithEvents ToolStripButton_About As System.Windows.Forms.ToolStripButton
-        Friend WithEvents ComboBox_SearchType As System.Windows.Forms.ComboBox
-        Friend WithEvents ComboBox_SearchCondition As System.Windows.Forms.ComboBox
+        Friend WithEvents ComboBox_SearchType As Global.HostsMan.UserInterface.Controls.ThemedComboBox
+        Friend WithEvents ComboBox_SearchCondition As Global.HostsMan.UserInterface.Controls.ThemedComboBox
         Friend WithEvents ContextMenuStrip_Listview As System.Windows.Forms.ContextMenuStrip
         Friend WithEvents ToolStripMenuItem_CopyIP As System.Windows.Forms.ToolStripMenuItem
         Friend WithEvents ToolStripMenuItem_CopyHostname As System.Windows.Forms.ToolStripMenuItem
         Friend WithEvents ToolStripMenuItem_Navigate As System.Windows.Forms.ToolStripMenuItem
+        Friend WithEvents ToggleSwitch_DarkTheme As Global.HostsMan.UserInterface.Controls.ToggleSwitch
+        Friend WithEvents ToolTip_Main As System.Windows.Forms.ToolTip
 
     End Class
 

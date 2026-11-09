@@ -53,6 +53,18 @@ Namespace My
                 Return defaultInstance
             End Get
         End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("Light")>  _
+        Public Property AppTheme() As Global.HostsMan.UserInterface.Theming.AppTheme
+            Get
+                Return CType(Me("AppTheme"),Global.HostsMan.UserInterface.Theming.AppTheme)
+            End Get
+            Set
+                Me("AppTheme") = value
+            End Set
+        End Property
     End Class
 End Namespace
 

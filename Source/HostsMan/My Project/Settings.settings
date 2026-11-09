@@ -3,5 +3,9 @@
   <Profiles>
     <Profile Name="(Default)" />
   </Profiles>
-  <Settings />
+  <Settings>
+    <Setting Name="AppTheme" Type="HostsMan.UserInterface.Theming.AppTheme" Scope="User">
+      <Value Profile="(Default)">Light</Value>
+    </Setting>
+  </Settings>
 </SettingsFile>

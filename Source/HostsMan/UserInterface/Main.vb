@@ -1,6 +1,6 @@
 ﻿' ***********************************************************************
 ' Author   : Elektro
-' Modified : 18-January-2015
+' Modified : 09-November-2026
 ' ***********************************************************************
 ' <copyright file="Main.vb" company="Elektro Studios">
 '     Copyright (c) Elektro Studios. All rights reserved.
@@ -17,11 +17,14 @@ Option Infer Off
 
 #Region " Imports "
 
+Imports System.ComponentModel
+Imports System.IO
+Imports System.Security
+
 Imports HostsMan.Tools
 Imports HostsMan.Tools.HostsTools
-Imports System.IO
 Imports HostsMan.Tools.ListViewColumnSorter
-Imports System.ComponentModel
+Imports HostsMan.UserInterface.Theming
 
 #End Region
 
@@ -39,84 +42,77 @@ Namespace UserInterface
         ''' <summary>
         ''' The <see cref="WindowSticker"/> instance that sticks the Form on the Desktop screen.
         ''' </summary>
-        Private windowSticker As New WindowSticker(ClientForm:=Me) With {.SnapMargin = 35}
+        Private ReadOnly windowSticker As New WindowSticker(clientForm:=Me) With {.SnapMargin = 35}
 
         ''' <summary>
-        ''' Gets or sets the hosts object.
+        ''' Gets the hosts object.
         ''' </summary>
         ''' <value>The hosts object.</value>
-        Private Property HostsObj As New HostsTools()
+        Private ReadOnly Property HostsObj As HostsTools = New HostsTools()
 
         ''' <summary>
-        ''' Gets or sets the Hosts mappings.
+        ''' Gets or sets the Hosts mappings being edited (the source of truth of the list view).
         ''' </summary>
         ''' <value>The Hosts mappings.</value>
-        Private Property Mappings As List(Of MappingInfo)
-
-        ''' <summary>
-        ''' Gets the Windows Directory path.
-        ''' </summary>
-        ''' <value>The Windows Directory path.</value>
-        Private ReadOnly Property WinDirPath As String
-            Get
-                Return Environment.GetFolderPath(Environment.SpecialFolder.Windows)
-            End Get
-        End Property
+        Private Property Mappings As New List(Of MappingInfo)
 
         ''' <summary>
         ''' The ListViewColumnSorter instance.
         ''' </summary>
-        Private columnSorter As New ListViewColumnSorter
+        Private ReadOnly columnSorter As New ListViewColumnSorter()
 
         ''' <summary>
         ''' Gets or sets the mapping search type.
         ''' </summary>
         ''' <value>The mapping search type.</value>
-        Private Property CurrentMappingInfoSearchType As MappingInfoSearchType
+        Private Property CurrentSearchType As MappingSearchType = MappingSearchType.HostName
 
         ''' <summary>
         ''' Gets or sets the mapping search condition.
         ''' </summary>
         ''' <value>The mapping search condition.</value>
-        Private Property CurrentMappingInfoSearchCondition As MappingInfoSearchCondition
+        Private Property CurrentSearchCondition As MappingSearchCondition = MappingSearchCondition.ContainsText
+
+        ''' <summary>
+        ''' A value indicating whether the Hosts file was successfully loaded.
+        ''' Editing is not allowed when the file could not be loaded, to avoid overwriting it with an empty list.
+        ''' </summary>
+        Private isHostsFileLoaded As Boolean
+
+        ''' <summary>
+        ''' A value indicating whether there are changes that have not been saved to the Hosts file.
+        ''' </summary>
+        Private hasUnsavedChanges As Boolean
+
+        ''' <summary>
+        ''' Gets the Windows Directory path.
+        ''' </summary>
+        ''' <value>The Windows Directory path.</value>
+        Private Shared ReadOnly Property WinDirPath As String
+            Get
+                Return Environment.GetFolderPath(Environment.SpecialFolder.Windows)
+            End Get
+        End Property
 
 #End Region
 
-#Region " Enumerations "
+#Region " Constructors "
 
         ''' <summary>
-        ''' Specifies a mapping search type.
+        ''' Initializes a new instance of the <see cref="Main"/> class.
         ''' </summary>
-        Private Enum MappingInfoSearchType
+        Public Sub New()
 
-            ''' <summary>
-            ''' Search by IP Address.
-            ''' </summary>
-            IP
+            ' This call is required by the designer.
+            Me.InitializeComponent()
 
-            ''' <summary>
-            ''' Search by HostName.
-            ''' </summary>
-            HostName
+            ' Show the program name and version in the title bar.
+            Me.Text = Main.GetWindowTitle(My.Application.Info.Title, My.Application.Info.Version)
 
-        End Enum
+            ' Reflect the current theme in the theme switch.
+            Me.ToggleSwitch_DarkTheme.Checked = (ThemeManager.CurrentTheme = AppTheme.Dark)
 
-        ''' <summary>
-        ''' Specifies a mapping search condition.
-        ''' </summary>
-        Private Enum MappingInfoSearchCondition
-
-            ''' <summary>
-            ''' Starting with text.
-            ''' </summary>
-            StartsWithText
-
-            ''' <summary>
-            ''' Containing text.
-            ''' </summary>
-            ContainsText
-
-        End Enum
+        End Sub
 
 #End Region
 
@@ -136,6 +132,33 @@ Namespace UserInterface
             Me.InitializeListview()
             Me.InitializeComboBox()
             Me.LoadHostsFile()
+
+        End Sub
+
+        ''' <summary>
+        ''' Handles the FormClosing event of the Main Form.
+        ''' </summary>
+        ''' <param name="sender">The source of the event.</param>
+        ''' <param name="e">The <see cref="FormClosingEventArgs"/> instance containing the event data.</param>
+        Private Sub Main_FormClosing(ByVal sender As Object, ByVal e As FormClosingEventArgs) _
+        Handles MyBase.FormClosing
+
+            If Not Me.hasUnsavedChanges Then
+                Exit Sub
+            End If
+
+            Dim answer As DialogResult
+            Using New CenteredMessageBox(ownerForm:=Me)
+                answer = MessageBox.Show(Me, "There are unsaved changes. Do you want to save them to the hosts file before closing?",
+                                         Me.Text, MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question)
+            End Using
+
+            Select Case answer
+                Case DialogResult.Yes
+                    e.Cancel = Not Me.SaveHostsFile()
+                Case DialogResult.Cancel
+                    e.Cancel = True
+            End Select
 
         End Sub
 
@@ -195,35 +218,20 @@ Namespace UserInterface
         Private Sub ToolStripButton_Add_Click(ByVal sender As Object, ByVal e As EventArgs) _
         Handles ToolStripButton_Add.Click
 
-            Dim mappingInfo As New MappingInfo
+            Dim mappingInfo As New MappingInfo()
 
-            Using mappingForm As New MappingForm(mappingInfo)
+            If Not Me.ShowMappingForm(mappingInfo, "Add Mapping", My.Resources.Add) Then
+                Exit Sub
+            End If
 
-                mappingForm.Icon = Icon.FromHandle(My.Resources.Add.GetHicon)
-                mappingForm.Text = "Add New Mapping"
+            If Me.Mappings.Exists(Function(x As MappingInfo) x.ConflictsWith(mappingInfo)) Then
+                Me.ShowError($"The hostname '{mappingInfo.HostName}' is already mapped to another address of the same type (IPv4 or IPv6).")
+                Exit Sub
+            End If
 
-                If mappingForm.ShowDialog() = Windows.Forms.DialogResult.OK Then
-
-                    If Me.Mappings.Exists(Function(x As MappingInfo)
-                                              Return x.HostName.Equals(mappingInfo.HostName, StringComparison.OrdinalIgnoreCase)
-                                          End Function) Then
-
-                        Using New CenteredMessageBox(ownerForm:=Me)
-                            MessageBox.Show("This HostName already exists in list", Me.Text,
-                                            MessageBoxButtons.OK, MessageBoxIcon.Error)
-                        End Using
-
-                    Else
-                        Me.Mappings.Add(mappingInfo)
-                        Me.AppendMappingsToListview(mappingInfo)
-                        Me.ToolStripButton_Clean.Enabled = CBool(ListView_Mappings.Items.Count)
-                        Me.ToolStripButton_Save.Enabled = True
-
-                    End If
-
-                End If
-
-            End Using
+            Me.Mappings.Add(mappingInfo)
+            Me.RefreshListView()
+            Me.MarkAsModified()
 
         End Sub
 
@@ -235,19 +243,19 @@ Namespace UserInterface
         Private Sub ToolStripButton_Remove_Click(ByVal sender As Object, ByVal e As EventArgs) _
         Handles ToolStripButton_Remove.Click
 
-            Me.ListView_Mappings.Enabled = False
+            Me.ListView_Mappings.BeginUpdate()
+            Try
+                For Each item As ListViewItem In Me.ListView_Mappings.SelectedItems.Cast(Of ListViewItem).ToArray()
+                    Me.Mappings.Remove(Main.GetMapping(item))
+                    Me.ListView_Mappings.Items.Remove(item)
+                Next item
 
-            For Each item As ListViewItem In Me.ListView_Mappings.SelectedItems
+            Finally
+                Me.ListView_Mappings.EndUpdate()
 
-                Dim mapping As MappingInfo = Me.FindMappingInfo(item)
-                Me.Mappings.Remove(mapping)
-                Me.ListView_Mappings.Items.Remove(item)
+            End Try
 
-            Next item
-
-            Me.ToolStripButton_Clean.Enabled = CBool(ListView_Mappings.Items.Count)
-            Me.ToolStripButton_Save.Enabled = True
-            Me.ListView_Mappings.Enabled = True
+            Me.MarkAsModified()
 
         End Sub
 
@@ -259,21 +267,7 @@ Namespace UserInterface
         Private Sub ToolStripButton_Enable_Click(ByVal sender As Object, ByVal e As EventArgs) _
         Handles ToolStripButton_Enable.Click
 
-            Me.ListView_Mappings.Enabled = False
-
-            For Each item As ListViewItem In Me.ListView_Mappings.SelectedItems
-
-                Dim mapping As MappingInfo = Me.FindMappingInfo(item)
-                mapping.IsDisabled = False
-                item.SubItems(0).Text = "Yes"
-
-            Next item
-
-            Me.ListView_Mappings.Enabled = True
-
-            Me.ToolStripButton_Enable.Enabled = False
-            Me.ToolStripButton_Disable.Enabled = True
-            Me.ToolStripButton_Save.Enabled = True
+            Me.SetSelectedMappingsDisabled(isDisabled:=False)
 
         End Sub
 
@@ -285,21 +279,7 @@ Namespace UserInterface
         Private Sub ToolStripButton_Disable_Click(ByVal sender As Object, ByVal e As EventArgs) _
         Handles ToolStripButton_Disable.Click
 
-            Me.ListView_Mappings.Enabled = False
-
-            For Each item As ListViewItem In Me.ListView_Mappings.SelectedItems
-
-                Dim mapping As MappingInfo = Me.FindMappingInfo(item)
-                mapping.IsDisabled = True
-                item.SubItems(0).Text = "No"
-
-            Next item
-
-            Me.ListView_Mappings.Enabled = True
-
-            Me.ToolStripButton_Enable.Enabled = True
-            Me.ToolStripButton_Disable.Enabled = False
-            Me.ToolStripButton_Save.Enabled = True
+            Me.SetSelectedMappingsDisabled(isDisabled:=True)
 
         End Sub
 
@@ -311,7 +291,9 @@ Namespace UserInterface
         Private Sub ToolStripButton_Edit_Click(ByVal sender As Object, ByVal e As EventArgs) _
         Handles ToolStripButton_Edit.Click
 
-            Me.EditMapping(Me.FindMappingInfo(Me.ListView_Mappings.SelectedItems(0)))
+            If Me.ListView_Mappings.SelectedItems.Count = 1 Then
+                Me.EditMapping(Me.ListView_Mappings.SelectedItems(0))
+            End If
 
         End Sub
 
@@ -323,16 +305,9 @@ Namespace UserInterface
         Private Sub ToolStripButton_Rescan_Click(ByVal sender As Object, ByVal e As EventArgs) _
         Handles ToolStripButton_Rescan.Click
 
-            If Not ListView_Mappings.Items.Count = 0 Then
-
-                Using New CenteredMessageBox(ownerForm:=Me)
-
-                    If MessageBox.Show("This will discard all the current changes, Are you sure?", Me.Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question) = Windows.Forms.DialogResult.No Then
-                        Exit Sub
-                    End If
-
-                End Using
-
+            If Me.hasUnsavedChanges AndAlso
+               Not Me.Confirm("The unsaved changes will be lost. Do you want to reload the hosts file anyway?") Then
+                Exit Sub
             End If
 
             Me.LoadHostsFile()
@@ -347,23 +322,13 @@ Namespace UserInterface
         Private Sub ToolStripButton_Clean_Click(ByVal sender As Object, ByVal e As EventArgs) _
         Handles ToolStripButton_Clean.Click
 
-            Using New CenteredMessageBox(ownerForm:=Me)
+            If Not Me.Confirm("All the mappings will be removed from the list. Do you want to continue?") Then
+                Exit Sub
+            End If
 
-                If MessageBox.Show("This will remove all mappings from list, Are you sure?", Me.Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question) = Windows.Forms.DialogResult.Yes Then
-
-                    Me.Mappings.Clear()
-                    Me.ListView_Mappings.Items.Clear()
-
-                    DirectCast(sender, ToolStripButton).Enabled = False
-                    Me.ToolStripButton_Remove.Enabled = CBool(ListView_Mappings.SelectedItems.Count)
-                    Me.ToolStripButton_Enable.Enabled = CBool(ListView_Mappings.SelectedItems.Count)
-                    Me.ToolStripButton_Disable.Enabled = CBool(ListView_Mappings.SelectedItems.Count)
-                    Me.ToolStripButton_Save.Enabled = True
-                    Me.ToolStripButton_Edit.Enabled = False
-
-                End If
-
-            End Using
+            Me.Mappings.Clear()
+            Me.RefreshListView()
+            Me.MarkAsModified()
 
         End Sub
 
@@ -375,49 +340,7 @@ Namespace UserInterface
         Private Sub ToolStripButton_Save_Click(ByVal sender As Object, ByVal e As EventArgs) _
         Handles ToolStripButton_Save.Click
 
-            Dim oldPath As String = Me.HostsObj.HostsLocation
-            Dim tmpPath As String = Path.GetTempFileName
-
-            Me.HostsObj.HostsLocation = tmpPath
-
-            Try
-                Me.HostsObj.FileCreate()
-
-            Catch ex As Exception
-                Using New CenteredMessageBox(ownerForm:=Me)
-                    MessageBox.Show(ex.Message, Me.Text, MessageBoxButtons.OK, MessageBoxIcon.Error)
-                End Using
-                Exit Sub
-
-            End Try
-
-            Try
-                For Each mappinginfo As MappingInfo In Mappings
-                    Me.HostsObj.Add(mappinginfo)
-                Next mappinginfo
-
-            Catch ex As Exception
-                Using New CenteredMessageBox(ownerForm:=Me)
-                    MessageBox.Show(ex.Message, Me.Text, MessageBoxButtons.OK, MessageBoxIcon.Error)
-                End Using
-                Exit Sub
-
-            Finally
-                Me.HostsObj.HostsLocation = oldPath
-                DirectCast(sender, ToolStripButton).Enabled = False
-
-            End Try
-
-            Try
-                File.Replace(tmpPath, oldPath, Path.GetTempFileName)
-
-            Catch ex As Exception
-                Using New CenteredMessageBox(ownerForm:=Me)
-                    MessageBox.Show(ex.Message, Me.Text, MessageBoxButtons.OK, MessageBoxIcon.Error)
-                End Using
-                Exit Sub
-
-            End Try
+            Me.SaveHostsFile()
 
         End Sub
 
@@ -430,13 +353,11 @@ Namespace UserInterface
         Handles ToolStripButton_Directory.Click
 
             Try
-                Process.Start(Path.Combine(Me.WinDirPath, "Explorer.exe"),
-                              String.Format("/Select,""{0}""", Me.HostsObj.HostsLocation))
-
-            Catch ex As Exception
-                Using New CenteredMessageBox(ownerForm:=Me)
-                    MessageBox.Show(ex.Message, Me.Text, MessageBoxButtons.OK, MessageBoxIcon.Error)
+                Using Process.Start(Path.Combine(Main.WinDirPath, "Explorer.exe"), $"/Select,""{Me.HostsObj.HostsLocation}""")
                 End Using
+
+            Catch ex As Win32Exception
+                Me.ShowError(ex.Message)
 
             End Try
 
@@ -451,12 +372,10 @@ Namespace UserInterface
         Handles ToolStripButton_Notepad.Click
 
             Try
-                Me.HostsObj.FileOpen(Path.Combine(Me.WinDirPath, "Notepad.exe"))
+                Me.HostsObj.FileOpen(Path.Combine(Main.WinDirPath, "Notepad.exe"))
 
-            Catch ex As Exception
-                Using New CenteredMessageBox(ownerForm:=Me)
-                    MessageBox.Show(ex.Message, Me.Text, MessageBoxButtons.OK, MessageBoxIcon.Error)
-                End Using
+            Catch ex As Exception When TypeOf ex Is IOException OrElse TypeOf ex Is Win32Exception
+                Me.ShowError(ex.Message)
 
             End Try
 
@@ -467,18 +386,18 @@ Namespace UserInterface
         ''' </summary>
         ''' <param name="sender">The source of the event.</param>
         ''' <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        Private Sub ToolStripButton_About_Click(sender As Object, e As EventArgs) _
+        Private Sub ToolStripButton_About_Click(ByVal sender As Object, ByVal e As EventArgs) _
         Handles ToolStripButton_About.Click
 
-            Using aboutform As New About
-                aboutform.ShowDialog()
+            Using aboutform As New About()
+                aboutform.ShowDialog(Me)
             End Using
 
         End Sub
 
 #End Region
 
-#Region " Seach Panel "
+#Region " Search Panel "
 
         ''' <summary>
         ''' Handles the SelectedIndexChanged event of the ComboBox_SearchType control.
@@ -488,14 +407,13 @@ Namespace UserInterface
         Private Sub ComboBox_SearchType_SelectedIndexChanged(ByVal sender As Object, ByVal e As EventArgs) _
         Handles ComboBox_SearchType.SelectedIndexChanged
 
-            Me.CurrentMappingInfoSearchType = DirectCast([Enum].Parse(GetType(MappingInfoSearchType),
-                                                                       DirectCast(sender, ComboBox).Text, True), 
-                                                                   MappingInfoSearchType)
-
-            ' Update search
-            If Me.TextBox_Search.TextLength <> 0 Then
-                Me.FindMappingByText(Me.CurrentMappingInfoSearchType, Me.CurrentMappingInfoSearchCondition, Me.TextBox_Search.Text)
+            Dim index As Integer = DirectCast(sender, ComboBox).SelectedIndex
+            If Not [Enum].IsDefined(GetType(MappingSearchType), index) Then
+                Throw New InvalidEnumArgumentException(NameOf(index), index, GetType(MappingSearchType))
             End If
+
+            Me.CurrentSearchType = CType(index, MappingSearchType)
+            Me.RefreshListView()
 
         End Sub
 
@@ -507,23 +425,13 @@ Namespace UserInterface
         Private Sub ComboBox_SearchCondition_SelectedIndexChanged(ByVal sender As Object, ByVal e As EventArgs) _
         Handles ComboBox_SearchCondition.SelectedIndexChanged
 
-            Select Case DirectCast(sender, ComboBox).Text.ToLower
-
-                Case "starting with text..."
-                    Me.CurrentMappingInfoSearchCondition = MappingInfoSearchCondition.StartsWithText
-
-                Case "containing text..."
-                    Me.CurrentMappingInfoSearchCondition = MappingInfoSearchCondition.ContainsText
-
-                Case Else
-                    Throw New Exception("Wrong CurrentMappingInfoSearchCondition name!")
-
-            End Select
-
-            ' Update search
-            If Me.TextBox_Search.TextLength <> 0 Then
-                Me.FindMappingByText(Me.CurrentMappingInfoSearchType, Me.CurrentMappingInfoSearchCondition, Me.TextBox_Search.Text)
+            Dim index As Integer = DirectCast(sender, ComboBox).SelectedIndex
+            If Not [Enum].IsDefined(GetType(MappingSearchCondition), index) Then
+                Throw New InvalidEnumArgumentException(NameOf(index), index, GetType(MappingSearchCondition))
             End If
+
+            Me.CurrentSearchCondition = CType(index, MappingSearchCondition)
+            Me.RefreshListView()
 
         End Sub
 
@@ -535,7 +443,27 @@ Namespace UserInterface
         Private Sub TextBox_Search_TextChanged(ByVal sender As Object, ByVal e As EventArgs) _
         Handles TextBox_Search.TextChanged
 
-            Me.FindMappingByText(Me.CurrentMappingInfoSearchType, Me.CurrentMappingInfoSearchCondition, DirectCast(sender, TextBox).Text)
+            Me.RefreshListView()
+
+        End Sub
+
+        ''' <summary>
+        ''' Handles the CheckedChanged event of the ToggleSwitch_DarkTheme control.
+        ''' </summary>
+        ''' <param name="sender">The source of the event.</param>
+        ''' <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        Private Sub ToggleSwitch_DarkTheme_CheckedChanged(ByVal sender As Object, ByVal e As EventArgs) _
+        Handles ToggleSwitch_DarkTheme.CheckedChanged
+
+            Dim newTheme As AppTheme = If(DirectCast(sender, Global.HostsMan.UserInterface.Controls.ToggleSwitch).Checked, AppTheme.Dark, AppTheme.Light)
+            If newTheme = ThemeManager.CurrentTheme Then
+                Exit Sub
+            End If
+
+            ThemeManager.CurrentTheme = newTheme
+
+            My.Settings.AppTheme = newTheme
+            My.Settings.Save()
 
         End Sub
 
@@ -551,13 +479,7 @@ Namespace UserInterface
         Private Sub ListView_Mappings_SelectedIndexChanged(ByVal sender As Object, ByVal e As EventArgs) _
         Handles ListView_Mappings.SelectedIndexChanged
 
-            Dim lv As ListView = DirectCast(sender, ListView)
-
-            Me.ToolStripButton_Remove.Enabled = CBool(lv.SelectedItems.Count)
-            Me.ToolStripButton_Enable.Enabled = If(lv.SelectedItems.Count = 1, FindMappingInfo(ListView_Mappings.SelectedItems(0)).IsDisabled, CBool(lv.SelectedItems.Count))
-            Me.ToolStripButton_Disable.Enabled = If(lv.SelectedItems.Count = 1, Not FindMappingInfo(ListView_Mappings.SelectedItems(0)).IsDisabled, CBool(lv.SelectedItems.Count))
-            Me.ToolStripButton_Clean.Enabled = CBool(lv.Items.Count)
-            Me.ToolStripButton_Edit.Enabled = lv.SelectedItems.Count = 1
+            Me.UpdateToolStripButtonStates()
 
         End Sub
 
@@ -565,12 +487,16 @@ Namespace UserInterface
         ''' Handles the MouseDoubleClick event of the ListView_Mappings control.
         ''' </summary>
         ''' <param name="sender">The source of the event.</param>
-        ''' <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        Private Sub ListView_Mappings_DoubleClick(ByVal sender As Object, ByVal e As EventArgs) _
+        ''' <param name="e">The <see cref="MouseEventArgs"/> instance containing the event data.</param>
+        Private Sub ListView_Mappings_MouseDoubleClick(ByVal sender As Object, ByVal e As MouseEventArgs) _
         Handles ListView_Mappings.MouseDoubleClick
 
-            If DirectCast(e, MouseEventArgs).Button = Windows.Forms.MouseButtons.Left Then
-                Me.EditMapping(Me.FindMappingInfo(Me.ListView_Mappings.SelectedItems(0)))
+            If e.Button = MouseButtons.Left AndAlso
+               Me.isHostsFileLoaded AndAlso
+               Me.ListView_Mappings.SelectedItems.Count = 1 Then
+
+                Me.EditMapping(Me.ListView_Mappings.SelectedItems(0))
+
             End If
 
         End Sub
@@ -585,28 +511,20 @@ Namespace UserInterface
 
             Dim lv As ListView = DirectCast(sender, ListView)
 
-            ' Dinamycaly sets the sort-modifier to sort the column by text, number, or date.
+            ' Dynamically sets the sort-modifier to sort the column by text, number, or date.
             Me.columnSorter.SortModifier = DirectCast(lv.Columns(e.Column).Tag, SortModifiers)
 
             ' Determine whether clicked column is already the column that is being sorted.
             If e.Column = Me.columnSorter.Column Then
-
                 ' Reverse the current sort direction for this column.
-                If Me.columnSorter.Order = SortOrder.Ascending Then
-                    Me.columnSorter.Order = SortOrder.Descending
-
-                Else
-                    Me.columnSorter.Order = SortOrder.Ascending
-
-                End If ' Sorter.Order
+                Me.columnSorter.Order = If(Me.columnSorter.Order = SortOrder.Ascending, SortOrder.Descending, SortOrder.Ascending)
 
             Else
-
                 ' Set the column number that is to be sorted, default to ascending.
                 Me.columnSorter.Column = e.Column
                 Me.columnSorter.Order = SortOrder.Ascending
 
-            End If ' e.Column
+            End If
 
             ' Perform the sort with these new sort options.
             lv.Sort()
@@ -625,7 +543,7 @@ Namespace UserInterface
         Private Sub ContextMenuStrip_Listview_Opening(ByVal sender As Object, ByVal e As CancelEventArgs) _
         Handles ContextMenuStrip_Listview.Opening
 
-            e.Cancel = Not Me.ListView_Mappings.SelectedItems.Count = 1
+            e.Cancel = Me.ListView_Mappings.SelectedItems.Count <> 1
 
         End Sub
 
@@ -637,7 +555,7 @@ Namespace UserInterface
         Private Sub ToolStripMenuItem_CopyIP_Click(ByVal sender As Object, ByVal e As EventArgs) _
         Handles ToolStripMenuItem_CopyIP.Click
 
-            Clipboard.SetText(Me.ListView_Mappings.SelectedItems(0).SubItems(1).Text)
+            Clipboard.SetText(Main.GetMapping(Me.ListView_Mappings.SelectedItems(0)).IP)
 
         End Sub
 
@@ -649,7 +567,7 @@ Namespace UserInterface
         Private Sub ToolStripMenuItem_CopyHostname_Click(ByVal sender As Object, ByVal e As EventArgs) _
         Handles ToolStripMenuItem_CopyHostname.Click
 
-            Clipboard.SetText(Me.ListView_Mappings.SelectedItems(0).SubItems(2).Text)
+            Clipboard.SetText(Main.GetMapping(Me.ListView_Mappings.SelectedItems(0)).HostName)
 
         End Sub
 
@@ -661,19 +579,14 @@ Namespace UserInterface
         Private Sub ToolStripMenuItem_Navigate_Click(ByVal sender As Object, ByVal e As EventArgs) _
         Handles ToolStripMenuItem_Navigate.Click
 
-            Dim hostName As String = Me.ListView_Mappings.SelectedItems(0).SubItems(2).Text
-            If Not hostName.StartsWith("http://", StringComparison.OrdinalIgnoreCase) Then
-                hostName = hostName.Insert(0, "http://")
-            End If
+            Dim url As String = Main.GetNavigationUrl(Main.GetMapping(Me.ListView_Mappings.SelectedItems(0)).HostName)
 
             Try
-                Process.Start(hostName)
-
-            Catch ex As Exception
-                Using New CenteredMessageBox(ownerForm:=Me)
-                    MessageBox.Show(ex.Message, Me.Text,
-                                    MessageBoxButtons.OK, MessageBoxIcon.Error)
+                Using Process.Start(url)
                 End Using
+
+            Catch ex As Win32Exception
+                Me.ShowError(ex.Message)
 
             End Try
 
@@ -683,7 +596,106 @@ Namespace UserInterface
 
 #End Region
 
-#Region " Methods "
+#Region " Friend Shared Methods "
+
+        ''' <summary>
+        ''' Creates the <see cref="ListViewItem"/> that represents the specified mapping.
+        ''' The mapping is stored in the <see cref="ListViewItem.Tag"/> property.
+        ''' </summary>
+        ''' <param name="mappingInfo">The mapping.</param>
+        ''' <returns>The <see cref="ListViewItem"/>.</returns>
+        ''' <exception cref="ArgumentNullException"><paramref name="mappingInfo"/> is <see langword="Nothing"/>.</exception>
+        Friend Shared Function CreateListViewItem(ByVal mappingInfo As MappingInfo) As ListViewItem
+
+            If mappingInfo Is Nothing Then
+                Throw New ArgumentNullException(NameOf(mappingInfo))
+            End If
+
+            Dim item As New ListViewItem({String.Empty, String.Empty, String.Empty, String.Empty}) With {.Tag = mappingInfo}
+            Main.UpdateListViewItem(item)
+            Return item
+
+        End Function
+
+        ''' <summary>
+        ''' Updates the texts of the specified <see cref="ListViewItem"/> from the mapping stored in its <see cref="ListViewItem.Tag"/>.
+        ''' </summary>
+        ''' <param name="item">The list view item.</param>
+        ''' <exception cref="ArgumentNullException"><paramref name="item"/> is <see langword="Nothing"/>.</exception>
+        ''' <exception cref="InvalidOperationException">The item does not contain a mapping.</exception>
+        Friend Shared Sub UpdateListViewItem(ByVal item As ListViewItem)
+
+            Dim mappingInfo As MappingInfo = Main.GetMapping(item)
+
+            item.SubItems(0).Text = If(mappingInfo.IsDisabled, "No", "Yes")
+            item.SubItems(1).Text = mappingInfo.IP
+            item.SubItems(2).Text = mappingInfo.HostName
+            item.SubItems(3).Text = If(mappingInfo.Comment, String.Empty)
+
+        End Sub
+
+        ''' <summary>
+        ''' Gets the mapping represented by the specified <see cref="ListViewItem"/>.
+        ''' </summary>
+        ''' <param name="item">The list view item.</param>
+        ''' <returns>The mapping.</returns>
+        ''' <exception cref="ArgumentNullException"><paramref name="item"/> is <see langword="Nothing"/>.</exception>
+        ''' <exception cref="InvalidOperationException">The item does not contain a mapping.</exception>
+        Friend Shared Function GetMapping(ByVal item As ListViewItem) As MappingInfo
+
+            If item Is Nothing Then
+                Throw New ArgumentNullException(NameOf(item))
+            End If
+
+            Dim mappingInfo As MappingInfo = TryCast(item.Tag, MappingInfo)
+            If mappingInfo Is Nothing Then
+                Throw New InvalidOperationException("The list view item does not contain a mapping.")
+            End If
+
+            Return mappingInfo
+
+        End Function
+
+        ''' <summary>
+        ''' Gets the text of the window title bar ("{Title} {Major}.{Minor}.{Build}").
+        ''' </summary>
+        ''' <param name="title">The program title.</param>
+        ''' <param name="version">The program version.</param>
+        ''' <returns>The window title.</returns>
+        ''' <exception cref="ArgumentNullException"><paramref name="title"/> or <paramref name="version"/> is <see langword="Nothing"/>.</exception>
+        Friend Shared Function GetWindowTitle(ByVal title As String, ByVal version As Version) As String
+
+            If title Is Nothing Then
+                Throw New ArgumentNullException(NameOf(title))
+            End If
+
+            If version Is Nothing Then
+                Throw New ArgumentNullException(NameOf(version))
+            End If
+
+            Return $"{title} {version.ToString(3)}"
+
+        End Function
+
+        ''' <summary>
+        ''' Gets the URL to navigate to the specified hostname.
+        ''' </summary>
+        ''' <param name="hostName">The hostname.</param>
+        ''' <returns>The URL ("http://" is prepended if the hostname has no scheme).</returns>
+        ''' <exception cref="ArgumentException"><paramref name="hostName"/> is <see langword="Nothing"/> or empty.</exception>
+        Friend Shared Function GetNavigationUrl(ByVal hostName As String) As String
+
+            If String.IsNullOrEmpty(hostName) Then
+                Throw New ArgumentException("The hostname cannot be null or empty.", NameOf(hostName))
+            End If
+
+            Return If(hostName.Contains("://"), hostName, $"http://{hostName}")
+
+        End Function
+
+#End Region
+
+#Region " Private Methods "
 
         ''' <summary>
         ''' Initializes the listview properties.
@@ -715,207 +727,244 @@ Namespace UserInterface
         ''' </summary>
         Private Sub InitializeComboBox()
 
-            Me.ComboBox_SearchType.SelectedIndex = 1
-            Me.ComboBox_SearchCondition.SelectedIndex = 1
+            Me.ComboBox_SearchType.SelectedIndex = MappingSearchType.HostName
+            Me.ComboBox_SearchCondition.SelectedIndex = MappingSearchCondition.ContainsText
 
         End Sub
 
         ''' <summary>
-        ''' Loads the hosts file.
+        ''' Loads the hosts file (creating it if it does not exist).
         ''' </summary>
         Private Sub LoadHostsFile()
 
-            If Not Me.HostsObj.FileExists() Then
-
-                Try
+            Try
+                If Not Me.HostsObj.FileExists() Then
                     Me.HostsObj.FileCreate()
+                End If
 
-                Catch ex As Exception
-                    Using New CenteredMessageBox(ownerForm:=Me)
-                        MessageBox.Show(ex.Message, Me.Text, MessageBoxButtons.OK, MessageBoxIcon.Error)
-                    End Using
+                Me.Mappings = Me.HostsObj.GetMappings()
+                Me.isHostsFileLoaded = True
 
-                    Exit Sub
+            Catch ex As Exception When TypeOf ex Is IOException OrElse
+                                       TypeOf ex Is UnauthorizedAccessException OrElse
+                                       TypeOf ex Is SecurityException
 
-                End Try
+                Me.Mappings = New List(Of MappingInfo)
+                Me.isHostsFileLoaded = False
+                Me.ShowError($"The hosts file could not be loaded:{Environment.NewLine}{Environment.NewLine}{ex.Message}")
 
-            End If
+            End Try
 
-            Me.Mappings = Me.HostsObj.GetMappings()
-            Me.AddMappingsToListview(Me.Mappings)
-            Me.ToolStripButton_Clean.Enabled = CBool(ListView_Mappings.Items.Count)
-            Me.ToolStripButton_Save.Enabled = False
-            Me.ToolStripButton_Enable.Enabled = False
-            Me.ToolStripButton_Disable.Enabled = False
-            Me.ToolStripButton_Remove.Enabled = False
-            Me.ToolStripButton_Edit.Enabled = False
+            Me.hasUnsavedChanges = False
+            Me.RefreshListView()
 
         End Sub
 
         ''' <summary>
-        ''' Finds the <see cref="MappingInfo"/> equivalent to the specified listview item.
+        ''' Saves the mappings to the Hosts file.
+        ''' <para></para>
+        ''' The mappings are written to a temporary file in the same directory than the Hosts file,
+        ''' which then atomically replaces the Hosts file (preserving its attributes and permissions).
         ''' </summary>
-        ''' <param name="item">The listview item.</param>
-        ''' <returns>MappingInfo.</returns>
-        Private Function FindMappingInfo(ByVal item As ListViewItem) As MappingInfo
+        ''' <returns><see langword="True"/> if the Hosts file was saved; otherwise, <see langword="False"/>.</returns>
+        Private Function SaveHostsFile() As Boolean
 
-            Dim mapping As MappingInfo = (From mappingInfo As MappingInfo In Me.Mappings
-                                          Where mappingInfo.IP = item.SubItems(1).Text _
-                                                AndAlso mappingInfo.HostName = item.SubItems(2).Text).First
+            Dim hostsPath As String = Me.HostsObj.HostsLocation
+            Dim tempPath As String = Path.Combine(Path.GetDirectoryName(hostsPath), $"{Path.GetFileName(hostsPath)}.{Guid.NewGuid():N}.tmp")
 
-            Return mapping
+            Try
+                Dim writer As New HostsTools(tempPath) With {.HostsEncoding = Me.HostsObj.HostsEncoding}
+                writer.WriteMappings(Me.Mappings)
+
+                If File.Exists(hostsPath) Then
+                    File.Replace(tempPath, hostsPath, Nothing)
+                Else
+                    File.Move(tempPath, hostsPath)
+                End If
+
+                Me.MarkAsSaved()
+                Return True
+
+            Catch ex As UnauthorizedAccessException
+                Me.ShowError($"{ex.Message}{Environment.NewLine}{Environment.NewLine}Administrator rights are required to modify the hosts file. Run HostsMan as administrator and try again.")
+                Return False
+
+            Catch ex As Exception When TypeOf ex Is IOException OrElse
+                                       TypeOf ex Is SecurityException OrElse
+                                       TypeOf ex Is ArgumentException OrElse
+                                       TypeOf ex Is FormatException
+                Me.ShowError(ex.Message)
+                Return False
+
+            Finally
+                If File.Exists(tempPath) Then
+                    File.Delete(tempPath)
+                End If
+
+            End Try
 
         End Function
 
         ''' <summary>
-        ''' Adds the mappings into listview.
+        ''' Rebuilds the list view items from <see cref="Mappings"/>, applying the current search filter
+        ''' and preserving the current selection.
         ''' </summary>
-        ''' <param name="mappings">The mappings.</param>
-        Private Sub AddMappingsToListview(ByVal mappings As IEnumerable(Of MappingInfo))
+        Private Sub RefreshListView()
 
-            Dim lvCol As New List(Of ListViewItem)
+            Dim selected As New HashSet(Of MappingInfo)(
+                Me.ListView_Mappings.SelectedItems.Cast(Of ListViewItem).Select(Function(item As ListViewItem) Main.GetMapping(item)))
 
-            For Each mappingInfo As MappingInfo In mappings
-                lvCol.Add(New ListViewItem({If(Not mappingInfo.IsDisabled, "Yes", "No"),
-                                               mappingInfo.IP,
-                                               mappingInfo.HostName,
-                                               mappingInfo.Comment}))
-            Next mappingInfo
+            Dim visibleMappings As List(Of MappingInfo) =
+                MappingSearch.Filter(Me.Mappings, Me.CurrentSearchType, Me.CurrentSearchCondition, Me.TextBox_Search.Text)
+
+            Dim items As ListViewItem() = visibleMappings.Select(Function(m As MappingInfo) Main.CreateListViewItem(m)).ToArray()
+            For Each item As ListViewItem In items
+                item.Selected = selected.Contains(Main.GetMapping(item))
+            Next item
 
             Me.ListView_Mappings.BeginUpdate()
-            Me.ListView_Mappings.Items.Clear()
-            Me.ListView_Mappings.Items.AddRange(lvCol.ToArray)
-            Me.ListView_Mappings.EndUpdate()
+            Try
+                Me.ListView_Mappings.Items.Clear()
+                Me.ListView_Mappings.Items.AddRange(items)
+
+            Finally
+                Me.ListView_Mappings.EndUpdate()
+
+            End Try
+
+            Me.UpdateToolStripButtonStates()
 
         End Sub
 
         ''' <summary>
-        ''' Adds the mapping into listview.
+        ''' Updates the enabled state of the tool strip buttons according to the current state.
         ''' </summary>
-        Private Sub AppendMappingsToListview(ByVal mappingInfo As MappingInfo)
+        Private Sub UpdateToolStripButtonStates()
 
-            Me.ListView_Mappings.Items.Add(New ListViewItem({If(Not mappingInfo.IsDisabled, "Yes", "No"),
-                                                             mappingInfo.IP,
-                                                             mappingInfo.HostName,
-                                                             mappingInfo.Comment}))
+            Dim selectedMappings As List(Of MappingInfo) =
+                Me.ListView_Mappings.SelectedItems.Cast(Of ListViewItem).Select(Function(item As ListViewItem) Main.GetMapping(item)).ToList()
+
+            Dim canEdit As Boolean = Me.isHostsFileLoaded
+
+            Me.ToolStripButton_Add.Enabled = canEdit
+            Me.ToolStripButton_Remove.Enabled = canEdit AndAlso selectedMappings.Count <> 0
+            Me.ToolStripButton_Enable.Enabled = canEdit AndAlso selectedMappings.Exists(Function(m As MappingInfo) m.IsDisabled)
+            Me.ToolStripButton_Disable.Enabled = canEdit AndAlso selectedMappings.Exists(Function(m As MappingInfo) Not m.IsDisabled)
+            Me.ToolStripButton_Edit.Enabled = canEdit AndAlso selectedMappings.Count = 1
+            Me.ToolStripButton_Clean.Enabled = canEdit AndAlso Me.Mappings.Count <> 0
+            Me.ToolStripButton_Save.Enabled = canEdit AndAlso Me.hasUnsavedChanges
 
         End Sub
 
         ''' <summary>
-        ''' Edits the specified mapping.
+        ''' Enables or disables the selected mappings.
         ''' </summary>
-        ''' <param name="mappingInfo">The mapping information.</param>
-        Private Sub EditMapping(ByVal mappingInfo As MappingInfo)
+        ''' <param name="isDisabled"><see langword="True"/> to disable the selected mappings; <see langword="False"/> to enable them.</param>
+        Private Sub SetSelectedMappingsDisabled(ByVal isDisabled As Boolean)
 
-            Dim newMappingInfo As New MappingInfo With {
-                .IP = mappingInfo.IP,
-                .HostName = mappingInfo.HostName,
-                .Comment = mappingInfo.Comment,
-                .IsDisabled = mappingInfo.IsDisabled
-            }
+            For Each item As ListViewItem In Me.ListView_Mappings.SelectedItems
+                Main.GetMapping(item).IsDisabled = isDisabled
+                Main.UpdateListViewItem(item)
+            Next item
 
-            Using mappingForm As New MappingForm(newMappingInfo)
+            Me.MarkAsModified()
 
-                mappingForm.Icon = Icon.FromHandle(My.Resources.Edit.GetHicon)
-                mappingForm.Text = "Edit Mapping"
+        End Sub
 
-                If mappingForm.ShowDialog() = Windows.Forms.DialogResult.OK Then
+        ''' <summary>
+        ''' Edits the mapping represented by the specified list view item.
+        ''' </summary>
+        ''' <param name="item">The list view item.</param>
+        Private Sub EditMapping(ByVal item As ListViewItem)
 
-                    If Not (mappingInfo.IP = newMappingInfo.IP) _
-                    OrElse Not (mappingInfo.HostName.Equals(newMappingInfo.HostName, StringComparison.OrdinalIgnoreCase)) Then
+            Dim mappingInfo As MappingInfo = Main.GetMapping(item)
+            Dim editedMappingInfo As MappingInfo = mappingInfo.Clone()
 
-                        If Me.Mappings.Exists(Function(x As MappingInfo)
-                                                  Return (x.HostName.Equals(newMappingInfo.HostName, StringComparison.OrdinalIgnoreCase))
-                                              End Function) Then
+            If Not Me.ShowMappingForm(editedMappingInfo, "Edit Mapping", My.Resources.Edit) Then
+                Exit Sub
+            End If
 
-                            Using New CenteredMessageBox(ownerForm:=Me)
-                                MessageBox.Show("This HostName  already exists in list", Me.Text,
-                                                MessageBoxButtons.OK, MessageBoxIcon.Error)
-                            End Using
+            If Me.Mappings.Exists(Function(x As MappingInfo) x IsNot mappingInfo AndAlso x.ConflictsWith(editedMappingInfo)) Then
+                Me.ShowError($"The hostname '{editedMappingInfo.HostName}' is already mapped to another address of the same type (IPv4 or IPv6).")
+                Exit Sub
+            End If
 
-                            Exit Sub
+            mappingInfo.IP = editedMappingInfo.IP
+            mappingInfo.HostName = editedMappingInfo.HostName
+            mappingInfo.Comment = editedMappingInfo.Comment
+            mappingInfo.IsDisabled = editedMappingInfo.IsDisabled
 
-                        Else
-                            Me.ToolStripButton_Save.Enabled = True
+            Me.RefreshListView()
+            Me.MarkAsModified()
 
-                        End If
+        End Sub
 
-                    Else
-                        With Me.FindMappingInfo(Me.ListView_Mappings.SelectedItems(0))
-                            .IP = newMappingInfo.IP
-                            .HostName = newMappingInfo.HostName
-                            .Comment = newMappingInfo.Comment
-                            .IsDisabled = newMappingInfo.IsDisabled
-                        End With
+        ''' <summary>
+        ''' Shows the <see cref="MappingForm"/> to add or edit a mapping.
+        ''' </summary>
+        ''' <param name="mappingInfo">The mapping that receives the result.</param>
+        ''' <param name="title">The title of the form.</param>
+        ''' <param name="iconImage">The image used as the icon of the form. It is disposed by this method.</param>
+        ''' <returns><see langword="True"/> if the user confirmed the mapping; otherwise, <see langword="False"/>.</returns>
+        Private Function ShowMappingForm(ByVal mappingInfo As MappingInfo, ByVal title As String, ByVal iconImage As Bitmap) As Boolean
 
-                        Me.ListView_Mappings.Items(Me.ListView_Mappings.SelectedItems(0).Index) =
-                                                      New ListViewItem({If(Not newMappingInfo.IsDisabled, "Yes", "No"),
-                                                                        newMappingInfo.IP,
-                                                                        newMappingInfo.HostName,
-                                                                        newMappingInfo.Comment})
+            Using iconImage
+                Using formIcon As Icon = IconHelper.CreateIcon(iconImage),
+                      mappingForm As New MappingForm(mappingInfo)
 
-                        Me.ToolStripButton_Save.Enabled = True
+                    mappingForm.Icon = formIcon
+                    mappingForm.Text = title
+                    Return mappingForm.ShowDialog(Me) = DialogResult.OK
 
-                    End If
+                End Using
+            End Using
 
-                End If
+        End Function
 
+        ''' <summary>
+        ''' Marks the mappings as modified (enables the save button).
+        ''' </summary>
+        Private Sub MarkAsModified()
+
+            Me.hasUnsavedChanges = True
+            Me.UpdateToolStripButtonStates()
+
+        End Sub
+
+        ''' <summary>
+        ''' Marks the mappings as saved (disables the save button).
+        ''' </summary>
+        Private Sub MarkAsSaved()
+
+            Me.hasUnsavedChanges = False
+            Me.UpdateToolStripButtonStates()
+
+        End Sub
+
+        ''' <summary>
+        ''' Shows an error message box centered on this form.
+        ''' </summary>
+        ''' <param name="message">The error message.</param>
+        Private Sub ShowError(ByVal message As String)
+
+            Using New CenteredMessageBox(ownerForm:=Me)
+                MessageBox.Show(Me, message, Me.Text, MessageBoxButtons.OK, MessageBoxIcon.Error)
             End Using
 
         End Sub
 
         ''' <summary>
-        ''' Finds all the ocurrences of a mapping by the specified text.
+        ''' Shows a Yes/No question message box centered on this form.
         ''' </summary>
-        ''' <param name="mappingSearchType">Type of the mapping search.</param>
-        ''' <param name="pattern">The search pattern.</param>
-        Private Sub FindMappingByText(ByVal mappingSearchType As MappingInfoSearchType,
-                                      ByVal mappingSearchCondition As MappingInfoSearchCondition,
-                                      ByVal pattern As String)
+        ''' <param name="message">The question.</param>
+        ''' <returns><see langword="True"/> if the user answered Yes; otherwise, <see langword="False"/>.</returns>
+        Private Function Confirm(ByVal message As String) As Boolean
 
-            Dim mappings As List(Of MappingInfo) =
-                Me.Mappings.FindAll(Function(x As MappingInfo)
+            Using New CenteredMessageBox(ownerForm:=Me)
+                Return MessageBox.Show(Me, message, Me.Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes
+            End Using
 
-                                        Select Case mappingSearchType
-
-                                            Case Main.MappingInfoSearchType.IP
-                                                Select Case mappingSearchCondition
-
-                                                    Case MappingInfoSearchCondition.StartsWithText
-                                                        Return x.IP.StartsWith(pattern)
-
-                                                    Case MappingInfoSearchCondition.ContainsText
-                                                        Return x.IP.Contains(pattern)
-
-                                                    Case Else
-                                                        Return Nothing
-
-                                                End Select
-
-                                            Case Main.MappingInfoSearchType.HostName
-                                                Select Case mappingSearchCondition
-
-                                                    Case MappingInfoSearchCondition.StartsWithText
-                                                        Return x.HostName.ToLower.StartsWith(pattern.ToLower)
-
-                                                    Case MappingInfoSearchCondition.ContainsText
-                                                        Return x.HostName.ToLower.Contains(pattern.ToLower)
-
-                                                    Case Else
-                                                        Return Nothing
-
-                                                End Select
-
-                                            Case Else
-                                                Return Nothing
-
-                                        End Select
-
-                                    End Function)
-
-            Me.AddMappingsToListview(mappings)
-
-        End Sub
+        End Function
 
 #End Region
 

@@ -34,7 +34,8 @@ build_script:
 after_build:
   - >-
     7z a -r "%APPVEYOR_PROJECT_NAME%_Build_%APPVEYOR_BUILD_NUMBER%.zip" ^
-    -i!"Source\*\bin\*"
+    -i!"Source\*\bin\*" ^
+    -xr!"HostsMan.Tests"
   - >-
     dotnet nuget locals all --clear
 artifacts:

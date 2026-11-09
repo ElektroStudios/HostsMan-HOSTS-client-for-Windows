@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <RootNamespace>HostsMan.Tests</RootNamespace>
+    <AssemblyName>HostsMan.Tests</AssemblyName>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <OptionExplicit>On</OptionExplicit>
+    <OptionStrict>On</OptionStrict>
+    <OptionInfer>Off</OptionInfer>
+    <OptionCompare>Binary</OptionCompare>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
+    <PackageReference Include="MSTest.TestAdapter" Version="4.5.2" />
+    <PackageReference Include="MSTest.TestFramework" Version="4.5.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HostsMan\HostsMan.vbproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Import Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
+    <Import Include="System" />
+    <Import Include="System.Collections.Generic" />
+    <Import Include="System.Drawing" />
+    <Import Include="System.IO" />
+    <Import Include="System.Linq" />
+    <Import Include="System.Windows.Forms" />
+  </ItemGroup>
+
+</Project>

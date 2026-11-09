@@ -1,6 +1,6 @@
 ﻿' ***********************************************************************
 ' Author           : Elektro
-' Last Modified On : 08-20-2014
+' Last Modified On : 09-November-2026
 ' ***********************************************************************
 ' <copyright file="ListView Column-Sorter.vb" company="Elektro Studios">
 '     Copyright (c) Elektro Studios. All rights reserved.
@@ -9,106 +9,41 @@
 
 #Region " Usage Examples "
 
-'Public Class ListViewColumnSorter_TestForm : Inherits form
+'Public Class ListViewColumnSorter_TestForm : Inherits Form
 '
-'    ''' <summary>
-'    ''' The listview to sort.
-'    ''' </summary>
-'    Private WithEvents LV As New ListView
+'    Private WithEvents lv As New ListView
+'    Private ReadOnly sorter As New ListViewColumnSorter
 '
-'    ''' <summary>
-'    ''' The 'ListViewColumnSorter' instance.
-'    ''' </summary>
-'    Private Sorter As New ListViewColumnSorter
-'
-'    ''' <summary>
-'    ''' Initializes a new instance of the <see cref="ListViewColumnSorter_TestForm"/> class.
-'    ''' </summary>
 '    Public Sub New()
 '
-'        ' This call is required by the designer.
-'        InitializeComponent()
-'
-'        With LV ' Set the Listview properties.
-'
-'            ' Set the sorter, our 'ListViewColumnSorter'.
-'            .ListViewItemSorter = Sorter
-'
-'            ' The sorting default direction.
+'        With Me.lv
+'            .ListViewItemSorter = Me.sorter
 '            .Sorting = SortOrder.Ascending
-'
-'            ' Set the default sort-modifier.
-'            Sorter.SortModifier = ListViewColumnSorter.SortModifiers.SortByText
-'
-'            ' Add some columns.
 '            .Columns.Add("Text").Tag = ListViewColumnSorter.SortModifiers.SortByText
 '            .Columns.Add("Numbers").Tag = ListViewColumnSorter.SortModifiers.SortByNumber
 '            .Columns.Add("Dates").Tag = ListViewColumnSorter.SortModifiers.SortByDate
-'
-'            ' Adjust the column sizes.
-'            For Each col As ColumnHeader In LV.Columns
-'                col.Width = 100I
-'            Next
-'
-'            ' Add some items.
 '            .Items.Add("hello").SubItems.AddRange({"1", "11/11/2000"})
-'            .Items.Add("yeehaa!").SubItems.AddRange({"2", "11-11-2000"})
 '            .Items.Add("El3ktr0").SubItems.AddRange({"10", "9/9/1999"})
-'            .Items.Add("wow").SubItems.AddRange({"100", "21/08/2014"})
-'
-'            ' Visual-Style things.
 '            .Dock = DockStyle.Fill
 '            .View = View.Details
-'            .FullRowSelect = True
-'
 '        End With
 '
-'        With Me ' Set the Form properties.
-'
-'            .Size = New Size(400, 200)
-'            .FormBorderStyle = Windows.Forms.FormBorderStyle.FixedSingle
-'            .MaximizeBox = False
-'            .StartPosition = FormStartPosition.CenterScreen
-'            .Text = "ListViewColumnSorter TestForm"
-'
-'        End With
-'
-'        ' Add the Listview to UI.
-'        Me.Controls.Add(LV)
+'        Me.Controls.Add(Me.lv)
 '
 '    End Sub
 '
-'    ''' <summary>
-'    ''' Handles the 'ColumnClick' event of the 'ListView1' control.
-'    ''' </summary>
-'    Private Sub ListView1_ColumnClick(ByVal sender As Object, ByVal e As ColumnClickEventArgs) _
-'    Handles LV.ColumnClick
+'    Private Sub Lv_ColumnClick(sender As Object, e As ColumnClickEventArgs) Handles lv.ColumnClick
 '
-'        ' Dinamycaly sets the sort-modifier to sort the column by text, number, or date.
-'        Sorter.SortModifier = sender.columns(e.Column).tag
+'        Me.sorter.SortModifier = DirectCast(Me.lv.Columns(e.Column).Tag, ListViewColumnSorter.SortModifiers)
 '
-'        ' Determine whether clicked column is already the column that is being sorted.
-'        If e.Column = Sorter.Column Then
-'
-'            ' Reverse the current sort direction for this column.
-'            If Sorter.Order = SortOrder.Ascending Then
-'                Sorter.Order = SortOrder.Descending
-'
-'            Else
-'                Sorter.Order = SortOrder.Ascending
-'
-'            End If ' Sorter.Order
-'
+'        If e.Column = Me.sorter.Column Then
+'            Me.sorter.Order = If(Me.sorter.Order = SortOrder.Ascending, SortOrder.Descending, SortOrder.Ascending)
 '        Else
+'            Me.sorter.Column = e.Column
+'            Me.sorter.Order = SortOrder.Ascending
+'        End If
 '
-'            ' Set the column number that is to be sorted, default to ascending.
-'            Sorter.Column = e.Column
-'            Sorter.Order = SortOrder.Ascending
-'
-'        End If ' e.Column
-'
-'        ' Perform the sort with these new sort options.
-'        sender.Sort()
+'        Me.lv.Sort()
 '
 '    End Sub
 '
@@ -119,7 +54,7 @@
 #Region " Option Statements "
 
 Option Explicit On
-Option Strict Off
+Option Strict On
 Option Infer Off
 
 #End Region
@@ -127,6 +62,7 @@ Option Infer Off
 #Region " Imports "
 
 Imports System.ComponentModel
+Imports System.Globalization
 
 #End Region
 
@@ -135,59 +71,92 @@ Imports System.ComponentModel
 Namespace Tools
 
     ''' <summary>
-    ''' Performs a sorting comparison.
+    ''' Performs a sorting comparison of the items of a <see cref="ListView"/> by the text of one of its columns.
     ''' </summary>
     Public NotInheritable Class ListViewColumnSorter : Implements IComparer
 
 #Region " Objects "
 
-        '''' <summary>
-        '''' Indicates the comparer instance.
-        '''' </summary>
-        Private comparer As Object = New TextComparer
+        ''' <summary>
+        ''' The text comparer instance.
+        ''' </summary>
+        Private ReadOnly comparerText As New TextComparer()
+
+        ''' <summary>
+        ''' The numeric comparer instance.
+        ''' </summary>
+        Private ReadOnly comparerNumeric As New NumericComparer()
+
+        ''' <summary>
+        ''' The date comparer instance.
+        ''' </summary>
+        Private ReadOnly comparerDate As New DateComparer()
 
 #End Region
 
 #Region " Properties "
 
         ''' <summary>
-        ''' Gets or sets the number of the column to which to apply the sorting operation (Defaults to '0').
+        ''' Gets or sets the zero-based index of the column to which to apply the sorting operation (Defaults to '0').
         ''' </summary>
+        ''' <value>The zero-based column index.</value>
+        ''' <exception cref="ArgumentOutOfRangeException">The value is negative.</exception>
         Public Property Column As Integer
             Get
                 Return Me.column1
             End Get
             Set(ByVal value As Integer)
+                If value < 0 Then
+                    Throw New ArgumentOutOfRangeException(NameOf(value), value, "The column index cannot be negative.")
+                End If
                 Me.column1 = value
             End Set
         End Property
-        Private column1 As Integer = 0I
+        ''' <summary>
+        ''' ( Backing field of <see cref="Column"/> property. )
+        ''' </summary>
+        Private column1 As Integer = 0
 
         ''' <summary>
-        ''' Gets or sets the order of sorting to apply.
+        ''' Gets or sets the order of sorting to apply (Defaults to <see cref="SortOrder.None"/>).
         ''' </summary>
+        ''' <value>The order of sorting.</value>
+        ''' <exception cref="InvalidEnumArgumentException">The value is not a defined <see cref="SortOrder"/>.</exception>
         Public Property Order As SortOrder
             Get
                 Return Me.order1
             End Get
             Set(ByVal value As SortOrder)
+                If Not [Enum].IsDefined(GetType(SortOrder), value) Then
+                    Throw New InvalidEnumArgumentException(NameOf(value), CInt(value), GetType(SortOrder))
+                End If
                 Me.order1 = value
             End Set
         End Property
+        ''' <summary>
+        ''' ( Backing field of <see cref="Order"/> property. )
+        ''' </summary>
         Private order1 As SortOrder = SortOrder.None
 
         ''' <summary>
-        ''' Gets or sets the sort modifier.
+        ''' Gets or sets the sort modifier (Defaults to <see cref="SortModifiers.SortByText"/>).
         ''' </summary>
         ''' <value>The sort modifier.</value>
+        ''' <exception cref="InvalidEnumArgumentException">The value is not a defined <see cref="SortModifiers"/>.</exception>
         Public Property SortModifier As SortModifiers
             Get
                 Return Me.sortModifier1
             End Get
             Set(ByVal value As SortModifiers)
+                If Not [Enum].IsDefined(GetType(SortModifiers), value) Then
+                    Throw New InvalidEnumArgumentException(NameOf(value), CInt(value), GetType(SortModifiers))
+                End If
                 Me.sortModifier1 = value
             End Set
         End Property
+        ''' <summary>
+        ''' ( Backing field of <see cref="SortModifier"/> property. )
+        ''' </summary>
         Private sortModifier1 As SortModifiers = SortModifiers.SortByText
 
 #End Region
@@ -202,17 +171,17 @@ Namespace Tools
             ''' <summary>
             ''' 'X' is equals to 'Y'.
             ''' </summary>
-            Equals = 0I
+            Equals = 0
 
             ''' <summary>
             ''' 'X' is less than 'Y'.
             ''' </summary>
-            Less = -1I
+            Less = -1
 
             ''' <summary>
             ''' 'X' is greater than 'Y'.
             ''' </summary>
-            Greater = 1I
+            Greater = 1
 
         End Enum
 
@@ -222,19 +191,19 @@ Namespace Tools
         Public Enum SortModifiers As Integer
 
             ''' <summary>
-            ''' Treats the values ​​as text.
+            ''' Treats the values as text.
             ''' </summary>
-            SortByText = 0I
+            SortByText = 0
 
             ''' <summary>
-            ''' Treats the values ​​as numbers.
+            ''' Treats the values as numbers.
             ''' </summary>
-            SortByNumber = 1I
+            SortByNumber = 1
 
             ''' <summary>
-            ''' Treats valuesthe values ​​as dates.
+            ''' Treats the values as dates.
             ''' </summary>
-            SortByDate = 2I
+            SortByDate = 2
 
         End Enum
 
@@ -243,138 +212,75 @@ Namespace Tools
 #Region " Private Methods "
 
         ''' <summary>
-        ''' Compares two objects and returns a value indicating whether one is less than, equal to, or greater than the other.
+        ''' Compares two <see cref="ListViewItem"/> and returns a value indicating whether one is less than,
+        ''' equal to, or greater than the other, according to <see cref="Column"/>, <see cref="Order"/> and <see cref="SortModifier"/>.
         ''' </summary>
-        ''' <param name="x">The first object to compare.</param>
-        ''' <param name="y">The second object to compare.</param>
+        ''' <param name="x">The first <see cref="ListViewItem"/> to compare.</param>
+        ''' <param name="y">The second <see cref="ListViewItem"/> to compare.</param>
         ''' <returns>
-        ''' A signed integer that indicates the relative values of <paramref name="x"/> and <paramref name="y"/>, 
-        ''' 0: <paramref name="x"/> equals <paramref name="y"/>. 
-        ''' Less than 0: <paramref name="x"/> is less than <paramref name="y"/>. 
-        ''' Greater than 0: <paramref name="x"/> is greater than <paramref name="y"/>.
+        ''' Less than zero if <paramref name="x"/> sorts before <paramref name="y"/>;
+        ''' zero if they are equal;
+        ''' greater than zero if <paramref name="x"/> sorts after <paramref name="y"/>.
         ''' </returns>
+        ''' <exception cref="ArgumentNullException"><paramref name="x"/> or <paramref name="y"/> is <see langword="Nothing"/>.</exception>
+        ''' <exception cref="InvalidCastException"><paramref name="x"/> or <paramref name="y"/> is not a <see cref="ListViewItem"/>.</exception>
         Private Function Compare(ByVal x As Object, ByVal y As Object) As Integer Implements IComparer.Compare
 
-            Dim compareResult As ComparerResult = ComparerResult.Equals
-            Dim lVItemX, lVItemY As ListViewItem
-
-            ' Cast the objects to be compared
-            lVItemX = DirectCast(x, ListViewItem)
-            lVItemY = DirectCast(y, ListViewItem)
-
-            Dim strX As String = If(Not lVItemX.SubItems.Count <= Me.column1,
-                                   lVItemX.SubItems(Me.column1).Text,
-                                   Nothing)
-
-            Dim strY As String = If(Not lVItemY.SubItems.Count <= Me.column1,
-                                    lVItemY.SubItems(Me.column1).Text,
-                                    Nothing)
-
-            Dim listViewMain As ListView = lVItemX.ListView
-
-            ' Calculate correct return value based on object comparison
-            If listViewMain.Sorting <> SortOrder.Ascending AndAlso listViewMain.Sorting <> SortOrder.Descending Then
-
-                ' Return '0' to indicate they are equal
-                Return ComparerResult.Equals
-
+            If x Is Nothing Then
+                Throw New ArgumentNullException(NameOf(x))
             End If
 
-            If Me.sortModifier1.Equals(SortModifiers.SortByText) Then
+            If y Is Nothing Then
+                Throw New ArgumentNullException(NameOf(y))
+            End If
 
-                ' Compare the two items
-                If lVItemX.SubItems.Count <= Me.column1 AndAlso lVItemY.SubItems.Count <= Me.column1 Then
-                    compareResult = Me.comparer.Compare(Nothing, Nothing)
+            Dim itemX As ListViewItem = DirectCast(x, ListViewItem)
+            Dim itemY As ListViewItem = DirectCast(y, ListViewItem)
 
-                ElseIf lVItemX.SubItems.Count <= Me.column1 AndAlso lVItemY.SubItems.Count > Me.column1 Then
-                    compareResult = Me.comparer.Compare(Nothing, strY)
+            ' A ListView with sorting disabled keeps the insertion order.
+            Dim owner As ListView = itemX.ListView
+            If (owner IsNot Nothing AndAlso owner.Sorting = SortOrder.None) OrElse Me.order1 = SortOrder.None Then
+                Return ComparerResult.Equals
+            End If
 
-                ElseIf lVItemX.SubItems.Count > Me.column1 AndAlso lVItemY.SubItems.Count <= Me.column1 Then
-                    compareResult = Me.comparer.Compare(strX, Nothing)
+            Dim textX As String = ListViewColumnSorter.GetColumnText(itemX, Me.column1)
+            Dim textY As String = ListViewColumnSorter.GetColumnText(itemY, Me.column1)
+            Dim result As Integer = Math.Sign(Me.GetComparer().Compare(textX, textY))
 
-                Else
-                    compareResult = Me.comparer.Compare(strX, strY)
+            Return If(Me.order1 = SortOrder.Descending, -result, result)
 
-                End If
+        End Function
 
-            Else ' Me._SortModifier IsNot 'SortByText'
+        ''' <summary>
+        ''' Gets the comparer that corresponds to the current <see cref="SortModifier"/>.
+        ''' </summary>
+        ''' <returns>The comparer.</returns>
+        Private Function GetComparer() As IComparer
 
-                Select Case Me.sortModifier1
+            Select Case Me.sortModifier1
+                Case SortModifiers.SortByNumber
+                    Return Me.comparerNumeric
+                Case SortModifiers.SortByDate
+                    Return Me.comparerDate
+                Case Else
+                    Return Me.comparerText
+            End Select
 
-                    Case SortModifiers.SortByNumber
-                        If Me.comparer.GetType <> GetType(NumericComparer) Then
-                            Me.comparer = New NumericComparer
-                        End If
+        End Function
 
-                    Case SortModifiers.SortByDate
-                        If Me.comparer.GetType <> GetType(DateComparer) Then
-                            Me.comparer = New DateComparer
-                        End If
+        ''' <summary>
+        ''' Gets the text of the specified column of a <see cref="ListViewItem"/>.
+        ''' </summary>
+        ''' <param name="item">The item.</param>
+        ''' <param name="column">The zero-based column index.</param>
+        ''' <returns>The text of the column, or <see langword="Nothing"/> if the item has no sub-item for that column.</returns>
+        Private Shared Function GetColumnText(ByVal item As ListViewItem, ByVal column As Integer) As String
 
-                    Case Else
-                        If Me.comparer.GetType <> GetType(TextComparer) Then
-                            Me.comparer = New TextComparer
-                        End If
-
-                End Select
-
-                compareResult = comparer.Compare(strX, strY)
-
-            End If ' Me._SortModifier.Equals(...)
-
-            ' Calculate correct return value based on object comparison
-            If Me.order1 = SortOrder.Ascending Then
-                ' Ascending sort is selected, return normal result of compare operation
-                Return compareResult
-
-            ElseIf Me.order1 = SortOrder.Descending Then
-                ' Descending sort is selected, return negative result of compare operation
-                Return (-compareResult)
-
-            Else
-                ' Return '0' to indicate they are equal
-                Return 0I
-
-            End If ' Me._Order = ...
+            Return If(column < item.SubItems.Count, item.SubItems(column).Text, Nothing)
 
         End Function
 
 #End Region
-
-#Region " Hidden Methods "
-
-        ''' <summary>
-        ''' Serves as a hash function for a particular type.
-        ''' </summary>
-        <EditorBrowsable(EditorBrowsableState.Never)>
-        Public Shadows Sub GetHashCode()
-        End Sub
-
-        ''' <summary>
-        ''' Determines whether the specified System.Object instances are considered equal.
-        ''' </summary>
-        <EditorBrowsable(EditorBrowsableState.Never)>
-        Public Shadows Sub Equals()
-        End Sub
-
-        ''' <summary>
-        ''' Gets the System.Type of the current instance.
-        ''' </summary>
-        ''' <returns>The exact runtime type of the current instance.</returns>
-        <EditorBrowsable(EditorBrowsableState.Never)>
-        Public Shadows Function [GetType]()
-            Return Me.GetType
-        End Function
-
-        ''' <summary>
-        ''' Returns a String that represents the current object.
-        ''' </summary>
-        <EditorBrowsable(EditorBrowsableState.Never)>
-        Public Shadows Sub ToString()
-        End Sub
-
-#End Region
-
 
     End Class
 
@@ -389,9 +295,9 @@ End Namespace
 Namespace Tools
 
     ''' <summary>
-    ''' Performs a text comparison.
+    ''' Performs a case-insensitive text comparison, using the current culture.
     ''' </summary>
-    Public NotInheritable Class TextComparer : Inherits CaseInsensitiveComparer
+    Public NotInheritable Class TextComparer : Inherits CaseInsensitiveComparer : Implements IComparer
 
 #Region " Enumerations "
 
@@ -403,17 +309,17 @@ Namespace Tools
             ''' <summary>
             ''' 'X' is equals to 'Y'.
             ''' </summary>
-            Equals = 0I
+            Equals = 0
 
             ''' <summary>
             ''' 'X' is less than 'Y'.
             ''' </summary>
-            Less = -1I
+            Less = -1
 
             ''' <summary>
             ''' 'X' is greater than 'Y'.
             ''' </summary>
-            Greater = 1I
+            Greater = 1
 
         End Enum
 
@@ -423,41 +329,32 @@ Namespace Tools
 
         ''' <summary>
         ''' Compares two objects and returns a value indicating whether one is less than, equal to, or greater than the other.
+        ''' <para></para>
+        ''' <see langword="Nothing"/> sorts before any value, and strings sort after non-string values.
         ''' </summary>
         ''' <param name="x">The first object to compare.</param>
         ''' <param name="y">The second object to compare.</param>
-        ''' <returns>
-        ''' A signed integer that indicates the relative values of <paramref name="x"/> and <paramref name="y"/>, 
-        ''' 0: <paramref name="x"/> equals <paramref name="y"/>. 
-        ''' Less than 0: <paramref name="x"/> is less than <paramref name="y"/>. 
-        ''' Greater than 0: <paramref name="x"/> is greater than <paramref name="y"/>.
-        ''' </returns>
-        Friend Shadows Function Compare(ByVal x As Object, ByVal y As Object) As Integer
+        ''' <returns>A <see cref="ComparerResult"/> value (-1, 0 or 1).</returns>
+        Public Shadows Function Compare(ByVal x As Object, ByVal y As Object) As Integer Implements IComparer.Compare
 
-            ' Null parsing.
-            If x Is Nothing AndAlso y Is Nothing Then
-                Return ComparerResult.Equals ' X is equals to Y.
-
-            ElseIf x Is Nothing AndAlso y IsNot Nothing Then
-                Return ComparerResult.Less ' X is less than Y.
-
-            ElseIf x IsNot Nothing AndAlso y Is Nothing Then
-                Return ComparerResult.Greater ' X is greater than Y.
-
+            Dim nullResult As Integer
+            If ComparerHelper.TryCompareNulls(x, y, nullResult) Then
+                Return nullResult
             End If
 
-            ' String parsing:
-            If (TypeOf x Is String) AndAlso (TypeOf y Is String) Then ' True and True
-                Return [Enum].Parse(GetType(ComparerResult),
-                                    MyBase.Compare(x, y))
+            Dim isStringX As Boolean = TypeOf x Is String
+            Dim isStringY As Boolean = TypeOf y Is String
 
-            ElseIf (TypeOf x Is String) AndAlso Not (TypeOf y Is String) Then ' True and False
-                Return ComparerResult.Greater ' X is greater than Y.
+            If isStringX AndAlso isStringY Then
+                Return Math.Sign(MyBase.Compare(x, y))
 
-            ElseIf Not (TypeOf x Is String) AndAlso (TypeOf y Is String) Then ' False and True
-                Return ComparerResult.Less ' X is less than Y.
+            ElseIf isStringX Then
+                Return ComparerResult.Greater
 
-            Else ' False and False
+            ElseIf isStringY Then
+                Return ComparerResult.Less
+
+            Else
                 Return ComparerResult.Equals
 
             End If
@@ -477,7 +374,7 @@ End Namespace
 Namespace Tools
 
     ''' <summary>
-    ''' Performs a numeric comparison.
+    ''' Performs a numeric comparison, using the current culture to parse the values.
     ''' </summary>
     Public NotInheritable Class NumericComparer : Implements IComparer
 
@@ -491,17 +388,17 @@ Namespace Tools
             ''' <summary>
             ''' 'X' is equals to 'Y'.
             ''' </summary>
-            Equals = 0I
+            Equals = 0
 
             ''' <summary>
             ''' 'X' is less than 'Y'.
             ''' </summary>
-            Less = -1I
+            Less = -1
 
             ''' <summary>
             ''' 'X' is greater than 'Y'.
             ''' </summary>
-            Greater = 1I
+            Greater = 1
 
         End Enum
 
@@ -511,47 +408,38 @@ Namespace Tools
 
         ''' <summary>
         ''' Compares two objects and returns a value indicating whether one is less than, equal to, or greater than the other.
+        ''' <para></para>
+        ''' <see langword="Nothing"/> sorts before any value, numbers sort after non-numeric values,
+        ''' and two non-numeric values are compared as text.
         ''' </summary>
         ''' <param name="x">The first object to compare.</param>
         ''' <param name="y">The second object to compare.</param>
-        ''' <returns>
-        ''' A signed integer that indicates the relative values of <paramref name="x"/> and <paramref name="y"/>, 
-        ''' 0: <paramref name="x"/> equals <paramref name="y"/>. 
-        ''' Less than 0: <paramref name="x" /> is less than <paramref name="y"/>. 
-        ''' Greater than 0: <paramref name="x"/> is greater than <paramref name="y"/>.
-        ''' </returns>
-        Public Function Compare(ByVal x As Object, ByVal y As Object) As Integer _
-        Implements IComparer.Compare
+        ''' <returns>A <see cref="ComparerResult"/> value (-1, 0 or 1).</returns>
+        Public Function Compare(ByVal x As Object, ByVal y As Object) As Integer Implements IComparer.Compare
 
-            ' Null parsing.
-            If x Is Nothing AndAlso y Is Nothing Then
-                Return ComparerResult.Equals ' X is equals to Y.
-
-            ElseIf x Is Nothing AndAlso y IsNot Nothing Then
-                Return ComparerResult.Less ' X is less than Y.
-
-            ElseIf x IsNot Nothing AndAlso y Is Nothing Then
-                Return ComparerResult.Greater ' X is greater than Y.
-
+            Dim nullResult As Integer
+            If ComparerHelper.TryCompareNulls(x, y, nullResult) Then
+                Return nullResult
             End If
 
-            ' The single variables to parse the text.
-            Dim singleX, singleY As Single
+            Dim textX As String = Convert.ToString(x, CultureInfo.CurrentCulture)
+            Dim textY As String = Convert.ToString(y, CultureInfo.CurrentCulture)
+            Dim numberX As Double
+            Dim numberY As Double
+            Dim isNumberX As Boolean = Double.TryParse(textX, NumberStyles.Float Or NumberStyles.AllowThousands, CultureInfo.CurrentCulture, numberX)
+            Dim isNumberY As Boolean = Double.TryParse(textY, NumberStyles.Float Or NumberStyles.AllowThousands, CultureInfo.CurrentCulture, numberY)
 
-            ' Single parsing:
-            If Single.TryParse(x, singleX) AndAlso Single.TryParse(y, singleY) Then ' True and True
-                Return [Enum].Parse(GetType(ComparerResult),
-                                    singleX.CompareTo(singleY))
+            If isNumberX AndAlso isNumberY Then
+                Return Math.Sign(numberX.CompareTo(numberY))
 
-            ElseIf Single.TryParse(x, singleX) AndAlso Not Single.TryParse(y, singleY) Then ' True and False
-                Return ComparerResult.Greater ' X is greater than Y.
+            ElseIf isNumberX Then
+                Return ComparerResult.Greater
 
-            ElseIf Not Single.TryParse(x, singleX) AndAlso Single.TryParse(y, singleY) Then ' False and True
-                Return ComparerResult.Less ' X is less than Y.
+            ElseIf isNumberY Then
+                Return ComparerResult.Less
 
-            Else ' False and False
-                Return [Enum].Parse(GetType(ComparerResult),
-                                    x.ToString.CompareTo(y.ToString))
+            Else
+                Return Math.Sign(String.Compare(textX, textY, StringComparison.CurrentCulture))
 
             End If
 
@@ -570,7 +458,7 @@ End Namespace
 Namespace Tools
 
     ''' <summary>
-    ''' Performs a date comparison.
+    ''' Performs a date comparison, using the current culture to parse the values.
     ''' </summary>
     Public NotInheritable Class DateComparer : Implements IComparer
 
@@ -584,17 +472,17 @@ Namespace Tools
             ''' <summary>
             ''' 'X' is equals to 'Y'.
             ''' </summary>
-            Equals = 0I
+            Equals = 0
 
             ''' <summary>
             ''' 'X' is less than 'Y'.
             ''' </summary>
-            Less = -1I
+            Less = -1
 
             ''' <summary>
             ''' 'X' is greater than 'Y'.
             ''' </summary>
-            Greater = 1I
+            Greater = 1
 
         End Enum
 
@@ -604,52 +492,94 @@ Namespace Tools
 
         ''' <summary>
         ''' Compares two objects and returns a value indicating whether one is less than, equal to, or greater than the other.
+        ''' <para></para>
+        ''' <see langword="Nothing"/> sorts before any value, dates sort after non-date values,
+        ''' and two non-date values are compared as text.
         ''' </summary>
         ''' <param name="x">The first object to compare.</param>
         ''' <param name="y">The second object to compare.</param>
-        ''' <returns>
-        ''' A signed integer that indicates the relative values of <paramref name="x"/> and <paramref name="y"/>, 
-        ''' 0: <paramref name="x"/> equals <paramref name="y"/>. 
-        ''' Less than 0: <paramref name="x"/> is less than <paramref name="y"/>. 
-        ''' Greater than 0: <paramref name="x"/> is greater than <paramref name="y"/>.
-        ''' </returns>
+        ''' <returns>A <see cref="ComparerResult"/> value (-1, 0 or 1).</returns>
         Public Function Compare(ByVal x As Object, ByVal y As Object) As Integer Implements IComparer.Compare
 
-            ' Null parsing.
-            If x Is Nothing AndAlso y Is Nothing Then
-                Return ComparerResult.Equals ' X is equals to Y.
-
-            ElseIf x Is Nothing AndAlso y IsNot Nothing Then
-                Return ComparerResult.Less ' X is less than Y.
-
-            ElseIf x IsNot Nothing AndAlso y Is Nothing Then
-                Return ComparerResult.Greater ' X is greater than Y.
-
+            Dim nullResult As Integer
+            If ComparerHelper.TryCompareNulls(x, y, nullResult) Then
+                Return nullResult
             End If
 
-            ' The Date variables to parse the text.
-            Dim dateX, dateY As Date
+            Dim textX As String = Convert.ToString(x, CultureInfo.CurrentCulture)
+            Dim textY As String = Convert.ToString(y, CultureInfo.CurrentCulture)
+            Dim dateX As Date
+            Dim dateY As Date
+            Dim isDateX As Boolean = Date.TryParse(textX, CultureInfo.CurrentCulture, DateTimeStyles.None, dateX)
+            Dim isDateY As Boolean = Date.TryParse(textY, CultureInfo.CurrentCulture, DateTimeStyles.None, dateY)
 
-            ' Date parsing:
-            If Date.TryParse(x, dateX) AndAlso Date.TryParse(y, dateY) Then ' True and True
-                Return [Enum].Parse(GetType(ComparerResult),
-                                    dateX.CompareTo(dateY))
+            If isDateX AndAlso isDateY Then
+                Return Math.Sign(dateX.CompareTo(dateY))
 
-            ElseIf Date.TryParse(x, dateX) AndAlso Not Date.TryParse(y, dateY) Then ' True and False
-                Return ComparerResult.Greater ' X is greater than Y.
+            ElseIf isDateX Then
+                Return ComparerResult.Greater
 
-            ElseIf Not Date.TryParse(x, dateX) AndAlso Date.TryParse(y, dateY) Then ' False and True
-                Return ComparerResult.Less ' X is less than Y.
+            ElseIf isDateY Then
+                Return ComparerResult.Less
 
-            Else ' False and False
-                Return [Enum].Parse(GetType(ComparerResult),
-                                    x.ToString.CompareTo(y.ToString))
+            Else
+                Return Math.Sign(String.Compare(textX, textY, StringComparison.CurrentCulture))
 
             End If
 
         End Function
 
 #End Region
+
+    End Class
+
+End Namespace
+
+#End Region
+
+#Region " Helper "
+
+Namespace Tools
+
+    ''' <summary>
+    ''' Provides shared logic for the comparers.
+    ''' </summary>
+    Friend NotInheritable Class ComparerHelper
+
+        ''' <summary>
+        ''' Prevents a default instance of the <see cref="ComparerHelper"/> class from being created.
+        ''' </summary>
+        Private Sub New()
+        End Sub
+
+        ''' <summary>
+        ''' Compares two objects when at least one of them is <see langword="Nothing"/>.
+        ''' <see langword="Nothing"/> sorts before any value.
+        ''' </summary>
+        ''' <param name="x">The first object.</param>
+        ''' <param name="y">The second object.</param>
+        ''' <param name="result">When this method returns <see langword="True"/>, contains the comparison result (-1, 0 or 1).</param>
+        ''' <returns><see langword="True"/> if at least one of the objects is <see langword="Nothing"/>; otherwise, <see langword="False"/>.</returns>
+        Friend Shared Function TryCompareNulls(ByVal x As Object, ByVal y As Object, ByRef result As Integer) As Boolean
+
+            If x Is Nothing AndAlso y Is Nothing Then
+                result = 0
+                Return True
+
+            ElseIf x Is Nothing Then
+                result = -1
+                Return True
+
+            ElseIf y Is Nothing Then
+                result = 1
+                Return True
+
+            End If
+
+            result = 0
+            Return False
+
+        End Function
 
     End Class
 

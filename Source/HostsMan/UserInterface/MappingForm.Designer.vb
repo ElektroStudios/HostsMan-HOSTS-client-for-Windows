@@ -1,10 +1,8 @@
-﻿Imports HostsMan.UserInterface
-
-Namespace UserInterface
+﻿Namespace UserInterface
 
     <Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
     Partial Class MappingForm
-        Inherits System.Windows.Forms.Form
+        Inherits Global.HostsMan.UserInterface.Controls.ThemedForm
 
         'Form overrides dispose to clean up the component list.
         <System.Diagnostics.DebuggerNonUserCode()> _
@@ -34,10 +32,8 @@ Namespace UserInterface
             Me.TextBox_Comment = New System.Windows.Forms.TextBox()
             Me.Button_Confirm = New System.Windows.Forms.Button()
             Me.Button_Cancel = New System.Windows.Forms.Button()
-            Me.MaskedTextBox_IP1 = New System.Windows.Forms.MaskedTextBox()
-            Me.MaskedTextBox_IP2 = New System.Windows.Forms.MaskedTextBox()
-            Me.MaskedTextBox_IP3 = New System.Windows.Forms.MaskedTextBox()
-            Me.MaskedTextBox_IP4 = New System.Windows.Forms.MaskedTextBox()
+            Me.TextBox_IP = New System.Windows.Forms.TextBox()
+            Me.Label_IPHint = New System.Windows.Forms.Label()
             Me.RadioButton_Enabled = New System.Windows.Forms.RadioButton()
             Me.RadioButton_Disabled = New System.Windows.Forms.RadioButton()
             Me.SuspendLayout()
@@ -49,7 +45,7 @@ Namespace UserInterface
             Me.Label1.Name = "Label1"
             Me.Label1.Size = New System.Drawing.Size(58, 13)
             Me.Label1.TabIndex = 0
-            Me.Label1.Text = "IP Address"
+            Me.Label1.Text = "IP address"
             '
             'Label2
             '
@@ -58,7 +54,7 @@ Namespace UserInterface
             Me.Label2.Name = "Label2"
             Me.Label2.Size = New System.Drawing.Size(57, 13)
             Me.Label2.TabIndex = 5
-            Me.Label2.Text = "HostName"
+            Me.Label2.Text = "Hostname"
             '
             'Label3
             '
@@ -90,12 +86,13 @@ Namespace UserInterface
             Me.Button_Confirm.Cursor = System.Windows.Forms.Cursors.Hand
             Me.Button_Confirm.Enabled = False
             Me.Button_Confirm.FlatAppearance.BorderSize = 0
-            Me.Button_Confirm.Font = New System.Drawing.Font("Microsoft Sans Serif", 14.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+            Me.Button_Confirm.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
             Me.Button_Confirm.Location = New System.Drawing.Point(242, 90)
             Me.Button_Confirm.Name = "Button_Confirm"
             Me.Button_Confirm.Size = New System.Drawing.Size(158, 40)
             Me.Button_Confirm.TabIndex = 10
-            Me.Button_Confirm.Text = "Confirm"
+            Me.Button_Confirm.Text = "OK"
+            Me.Button_Confirm.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText
             Me.Button_Confirm.UseVisualStyleBackColor = False
             '
             'Button_Cancel
@@ -103,66 +100,33 @@ Namespace UserInterface
             Me.Button_Cancel.BackColor = System.Drawing.Color.Transparent
             Me.Button_Cancel.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom
             Me.Button_Cancel.Cursor = System.Windows.Forms.Cursors.Hand
+            Me.Button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel
             Me.Button_Cancel.FlatAppearance.BorderSize = 0
-            Me.Button_Cancel.Font = New System.Drawing.Font("Microsoft Sans Serif", 14.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+            Me.Button_Cancel.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
             Me.Button_Cancel.Location = New System.Drawing.Point(78, 90)
             Me.Button_Cancel.Name = "Button_Cancel"
             Me.Button_Cancel.Size = New System.Drawing.Size(158, 40)
             Me.Button_Cancel.TabIndex = 9
             Me.Button_Cancel.Text = "Cancel"
+            Me.Button_Cancel.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText
             Me.Button_Cancel.UseVisualStyleBackColor = False
             '
-            'MaskedTextBox_IP1
+            'TextBox_IP
             '
-            Me.MaskedTextBox_IP1.AsciiOnly = True
-            Me.MaskedTextBox_IP1.BeepOnError = True
-            Me.MaskedTextBox_IP1.Culture = New System.Globalization.CultureInfo("en-US")
-            Me.MaskedTextBox_IP1.InsertKeyMode = System.Windows.Forms.InsertKeyMode.Overwrite
-            Me.MaskedTextBox_IP1.Location = New System.Drawing.Point(78, 12)
-            Me.MaskedTextBox_IP1.Mask = "000"
-            Me.MaskedTextBox_IP1.Name = "MaskedTextBox_IP1"
-            Me.MaskedTextBox_IP1.Size = New System.Drawing.Size(32, 20)
-            Me.MaskedTextBox_IP1.TabIndex = 1
-            Me.MaskedTextBox_IP1.Text = "127"
+            Me.TextBox_IP.Location = New System.Drawing.Point(78, 12)
+            Me.TextBox_IP.MaxLength = 64
+            Me.TextBox_IP.Name = "TextBox_IP"
+            Me.TextBox_IP.Size = New System.Drawing.Size(158, 20)
+            Me.TextBox_IP.TabIndex = 1
             '
-            'MaskedTextBox_IP2
+            'Label_IPHint
             '
-            Me.MaskedTextBox_IP2.AsciiOnly = True
-            Me.MaskedTextBox_IP2.BeepOnError = True
-            Me.MaskedTextBox_IP2.Culture = New System.Globalization.CultureInfo("en-US")
-            Me.MaskedTextBox_IP2.InsertKeyMode = System.Windows.Forms.InsertKeyMode.Overwrite
-            Me.MaskedTextBox_IP2.Location = New System.Drawing.Point(120, 12)
-            Me.MaskedTextBox_IP2.Mask = "000"
-            Me.MaskedTextBox_IP2.Name = "MaskedTextBox_IP2"
-            Me.MaskedTextBox_IP2.Size = New System.Drawing.Size(32, 20)
-            Me.MaskedTextBox_IP2.TabIndex = 2
-            Me.MaskedTextBox_IP2.Text = "0"
-            '
-            'MaskedTextBox_IP3
-            '
-            Me.MaskedTextBox_IP3.AsciiOnly = True
-            Me.MaskedTextBox_IP3.BeepOnError = True
-            Me.MaskedTextBox_IP3.Culture = New System.Globalization.CultureInfo("en-US")
-            Me.MaskedTextBox_IP3.InsertKeyMode = System.Windows.Forms.InsertKeyMode.Overwrite
-            Me.MaskedTextBox_IP3.Location = New System.Drawing.Point(162, 12)
-            Me.MaskedTextBox_IP3.Mask = "000"
-            Me.MaskedTextBox_IP3.Name = "MaskedTextBox_IP3"
-            Me.MaskedTextBox_IP3.Size = New System.Drawing.Size(32, 20)
-            Me.MaskedTextBox_IP3.TabIndex = 3
-            Me.MaskedTextBox_IP3.Text = "0"
-            '
-            'MaskedTextBox_IP4
-            '
-            Me.MaskedTextBox_IP4.AsciiOnly = True
-            Me.MaskedTextBox_IP4.BeepOnError = True
-            Me.MaskedTextBox_IP4.Culture = New System.Globalization.CultureInfo("en-US")
-            Me.MaskedTextBox_IP4.InsertKeyMode = System.Windows.Forms.InsertKeyMode.Overwrite
-            Me.MaskedTextBox_IP4.Location = New System.Drawing.Point(204, 12)
-            Me.MaskedTextBox_IP4.Mask = "000"
-            Me.MaskedTextBox_IP4.Name = "MaskedTextBox_IP4"
-            Me.MaskedTextBox_IP4.Size = New System.Drawing.Size(32, 20)
-            Me.MaskedTextBox_IP4.TabIndex = 4
-            Me.MaskedTextBox_IP4.Text = "1"
+            Me.Label_IPHint.AutoSize = True
+            Me.Label_IPHint.Location = New System.Drawing.Point(242, 15)
+            Me.Label_IPHint.Name = "Label_IPHint"
+            Me.Label_IPHint.Size = New System.Drawing.Size(76, 13)
+            Me.Label_IPHint.TabIndex = 2
+            Me.Label_IPHint.Text = "(IPv4 or IPv6)"
             '
             'RadioButton_Enabled
             '
@@ -192,13 +156,13 @@ Namespace UserInterface
             '
             Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
             Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
+            Me.AcceptButton = Me.Button_Confirm
+            Me.CancelButton = Me.Button_Cancel
             Me.ClientSize = New System.Drawing.Size(412, 142)
             Me.Controls.Add(Me.RadioButton_Disabled)
             Me.Controls.Add(Me.RadioButton_Enabled)
-            Me.Controls.Add(Me.MaskedTextBox_IP4)
-            Me.Controls.Add(Me.MaskedTextBox_IP3)
-            Me.Controls.Add(Me.MaskedTextBox_IP2)
-            Me.Controls.Add(Me.MaskedTextBox_IP1)
+            Me.Controls.Add(Me.Label_IPHint)
+            Me.Controls.Add(Me.TextBox_IP)
             Me.Controls.Add(Me.Button_Confirm)
             Me.Controls.Add(Me.Button_Cancel)
             Me.Controls.Add(Me.TextBox_Comment)
@@ -213,7 +177,7 @@ Namespace UserInterface
             Me.Name = "MappingForm"
             Me.ShowInTaskbar = False
             Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent
-            Me.Text = "Mapping Form"
+            Me.Text = "Mapping"
             Me.ResumeLayout(False)
             Me.PerformLayout()
 
@@ -225,10 +189,8 @@ Namespace UserInterface
         Friend WithEvents TextBox_Comment As System.Windows.Forms.TextBox
         Friend WithEvents Button_Cancel As System.Windows.Forms.Button
         Friend WithEvents Button_Confirm As System.Windows.Forms.Button
-        Friend WithEvents MaskedTextBox_IP1 As System.Windows.Forms.MaskedTextBox
-        Friend WithEvents MaskedTextBox_IP2 As System.Windows.Forms.MaskedTextBox
-        Friend WithEvents MaskedTextBox_IP3 As System.Windows.Forms.MaskedTextBox
-        Friend WithEvents MaskedTextBox_IP4 As System.Windows.Forms.MaskedTextBox
+        Friend WithEvents TextBox_IP As System.Windows.Forms.TextBox
+        Friend WithEvents Label_IPHint As System.Windows.Forms.Label
         Friend WithEvents RadioButton_Enabled As System.Windows.Forms.RadioButton
         Friend WithEvents RadioButton_Disabled As System.Windows.Forms.RadioButton
     End Class
